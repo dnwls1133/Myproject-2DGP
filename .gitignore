@@ -1,8 +1,10 @@
-
 # Created by https://www.gitignore.io/api/python,pycharm
 
 
 .idea/
+
+# Sprites folder - contains large image files
+sprites/
 
 ### Python ###
 # Byte-compiled / optimized / DLL files
