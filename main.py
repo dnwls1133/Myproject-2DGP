@@ -59,12 +59,14 @@ def handle_events():
             running = False
         elif event.type == SDL_KEYDOWN:
             if event.key == SDLK_k:
-                world[0].current_animation = world[0].attack_animation
+                if world[0].current_animation != world[0].attack_animation:
+                    world[0].current_animation = world[0].attack_animation
+                    world[0].current_animation.current_frame = 0
+                    world[0].current_animation.frame_time = 0
+
             elif event.key == SDLK_ESCAPE:
                 running = False
-        elif event.type == SDL_KEYUP:
-            if event.key == SDLK_k:
-                world[0].current_animation = world[0].idle_animation
+
 
 
 def reset_world():
@@ -78,6 +80,14 @@ def reset_world():
 def update_world():
     for game_object in world:
         game_object.update()
+
+        if(game_object.current_animation == game_object.attack_animation and
+           game_object.current_animation.is_animation_end()):
+            game_object.current_animation = game_object.idle_animation
+            game_object.current_animation.current_frame = 0
+            game_object.current_animation.frame_time = 0
+
+
     pass
 def render_world():
     clear_canvas()
