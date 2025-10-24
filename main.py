@@ -1,5 +1,7 @@
 from pico2d import *
 from animation import AnimationManager
+from animation import register_animations
+
 from penintent import Penintent
 
 # 먼저 canvas를 열어서 pico2d를 완전히 초기화 (픽셀 아트에 적합한 크기)
@@ -10,14 +12,7 @@ anim_manager = AnimationManager()
 
 try:
     # 애니메이션 등록
-    anim_manager.register_animation('idle',
-        "sprites/player/texture2d/player_idle/penintent_idle_anim.json",
-        "sprites/player/texture2d/player_idle/penintent_idle_anim.png")
-
-    anim_manager.register_animation('attack',
-        "sprites/player/texture2d/player_attack/penintent_attack_combo_anim.json",
-        "sprites/player/texture2d/player_attack/penintent_attack_combo_anim.png")
-
+    register_animations(anim_manager)
     print("애니메이션 등록 완료")
 except Exception as e:
     print(f"애니메이션 등록 실패: {e}")
