@@ -86,4 +86,4 @@ class Animation:
 
     def is_animation_end(self):
         """애니메이션이 끝났는지 확인합니다."""
-        return self.current_frame >= 10
+        return self.current_frame >= 100

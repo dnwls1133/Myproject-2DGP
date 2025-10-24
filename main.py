@@ -1,5 +1,6 @@
 from pico2d import *
-from animation import AnimationManager, Animation
+from animation import AnimationManager
+from penintent import Penintent
 
 # 먼저 canvas를 열어서 pico2d를 완전히 초기화 (픽셀 아트에 적합한 크기)
 open_canvas(1024, 768)  # 더 큰 해상도로 설정
@@ -20,35 +21,6 @@ try:
     print("애니메이션 등록 완료")
 except Exception as e:
     print(f"애니메이션 등록 실패: {e}")
-
-
-class Penintent:
-    def __init__(self):
-        self.x, self.y = 400,200
-
-        # None 체크 추가
-        idle_data = anim_manager.get_animation('idle')
-        attack_data = anim_manager.get_animation('attack')
-
-        if idle_data is None or attack_data is None:
-            print("애니메이션 데이터가 없습니다!")
-            # 기본값 설정으로 오류 방지
-            self.idle_animation = None
-            self.attack_animation = None
-            self.current_animation = None
-            return
-
-        self.idle_animation = Animation(idle_data)
-        self.attack_animation = Animation(attack_data)
-        self.current_animation = self.idle_animation
-
-    def update(self):
-        if self.current_animation:
-            self.current_animation.update(0.005)
-
-    def draw(self):
-        if self.current_animation:
-            self.current_animation.draw(self.x,self.y)
 
 
 def handle_events():
@@ -74,7 +46,7 @@ def reset_world():
     global world
     running = True
     world = [] 
-    penintent = Penintent()
+    penintent = Penintent(anim_manager)  # anim_manager 인자 추가
     world.append(penintent)
 
 def update_world():
