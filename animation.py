@@ -63,6 +63,13 @@ def register_animations(anim_manager):
         "sprites/player/texture2d/player_parry/penitent_parry_anim.png"
     )
 
+    anim_manager.register_animation(
+        'elder_boss_jump',
+        "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.json",
+        "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.png"
+
+    )
+
 
 class AnimationManager:
     def __init__(self):

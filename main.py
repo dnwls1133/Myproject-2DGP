@@ -70,6 +70,6 @@ while running:
     # 게임 로직
     update_world()
     render_world()
-    #delay(0.05)
+    delay(0.00005)
 
 close_canvas()

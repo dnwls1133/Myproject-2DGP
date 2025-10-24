@@ -19,7 +19,7 @@ class Penintent:
         getting_up_data = anim_manager.get_animation('getting_up')
         parry_failed_data = anim_manager.get_animation('parry_failed')
         parry_success_data = anim_manager.get_animation('parry_success')
-
+        elder_jump_data = anim_manager.get_animation('elder_boss_jump')
 
 
          # None 체크 추가
@@ -41,6 +41,7 @@ class Penintent:
             self.getting_up_animation = None
             self.parry_failed_animation = None
             self.parry_success_animation = None
+            self.elder_boss_jump_animation = None
             return
 
         self.idle_animation = Animation(idle_data)
@@ -55,11 +56,14 @@ class Penintent:
         self.getting_up_animation = Animation(getting_up_data)
         self.parry_failed_animation = Animation(parry_failed_data)
         self.parry_success_animation = Animation(parry_success_data)
-        self.current_animation = self.dodge_animation
+        self.elder_boss_jump_animation = Animation(elder_jump_data)
+        self.current_animation = self.elder_boss_jump_animation
 
     def update(self):
         if self.current_animation:
             self.current_animation.update(0.005)
+
+
 
     def draw(self):
         if self.current_animation:
