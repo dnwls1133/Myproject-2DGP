@@ -1,6 +1,6 @@
 from pico2d import *
-from animation import AnimationManager
-from animation import register_animations
+from machine.animation import AnimationManager
+from machine.animation import register_animations
 
 from penintent import Penintent
 
@@ -47,13 +47,6 @@ def reset_world():
 def update_world():
     for game_object in world:
         game_object.update()
-
-        if(game_object.current_animation == game_object.attack_animation and
-           game_object.current_animation.is_animation_end()):
-            game_object.current_animation = game_object.idle_animation
-            game_object.current_animation.current_frame = 0
-            game_object.current_animation.frame_time = 0
-
 
     pass
 def render_world():

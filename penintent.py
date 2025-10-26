@@ -1,4 +1,4 @@
-from animation import Animation
+from machine.animation import Animation
 
 
 

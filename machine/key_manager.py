@@ -1,0 +1,50 @@
+from pico2d import *
+
+class KeyManager:
+    def __init__(self):
+        self._down = set()
+        self._pressed = set()
+        self._released = set()
+        self.quit = False
+
+    def update(self):
+        """프레임마다 호출: 이벤트를 처리하고 상태 갱신"""
+        self._pressed.clear()
+        self._released.clear()
+        self.quit = False
+        events = get_events()
+        for event in evetns:
+            if event.type == SDL_QUIT:
+                self.quit = True
+            elif event.type == SDL_KEYDOWN:
+                key = event.key
+                if key not in self.down:
+                    self._pressed.add(key)
+                self._down.add(key)
+            elif event.type == SDL_KEYUP:
+                key = event.key
+                self._down.discard(key)
+                self._released.add(key)
+
+
+
+    def is_down(self,key):
+        """키가 눌려져 있는지 여부 반환"""
+        return key in self._down
+
+    def was_pressed(self,key):
+        """키가 이번 프레임에 눌려졌는지 여부 반환"""
+        return key in self._pressed
+    def was_released(self,key):
+        """키가 이번 프레임에 떼어졌는지 여부 반환"""
+        return key in self._released
+
+    def any_pressed(self):
+        """이번 프레임에 눌려진 키가 하나라도 있는지 여부 반환"""
+        return bool(self._pressed)
+
+    def clear(self):
+        """모든 키 상태 초기화"""
+        self._down.clear()
+        self._pressed.clear()
+        self._released.clear()
