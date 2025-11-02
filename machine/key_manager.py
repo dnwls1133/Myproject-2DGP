@@ -13,12 +13,12 @@ class KeyManager:
         self._released.clear()
         self.quit = False
         events = get_events()
-        for event in evetns:
+        for event in events:
             if event.type == SDL_QUIT:
                 self.quit = True
             elif event.type == SDL_KEYDOWN:
                 key = event.key
-                if key not in self.down:
+                if key not in self._down:
                     self._pressed.add(key)
                 self._down.add(key)
             elif event.type == SDL_KEYUP:
