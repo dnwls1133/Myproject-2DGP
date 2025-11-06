@@ -147,13 +147,15 @@ class Animation:
         draw_width = int(frame_info['width'] * scale)
         draw_height = int(frame_info['height'] * scale)
 
+        screen_x , screen_y = game_framework.camera_manager.world_to_screen(x, y)
+
         self.image.clip_draw(
             frame_info['x'],
             self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],  # Y좌표 뒤집기
             frame_info['width'],
             frame_info['height'],
-            x,
-            y,
+            screen_x,
+            screen_y,
             draw_width,
             draw_height
         )
