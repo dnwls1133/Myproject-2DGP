@@ -1,10 +1,12 @@
 import time
 from machine.time_manager import TimeManager
+from machine.camera_manager import CameraManager
 
 frame_time = 0.0
 running = None
 stack = None
 time_manager = None
+camera_manager = None
 
 def change_mode(mode):
     global stack
@@ -43,11 +45,12 @@ def quit():
     running = False
 
 
-def run(start_mode):
-    global running, stack, time_manager
+def run(start_mode,screen_width=800,screen_height=600,world_width=None,world_height=None):
+    global running, stack, time_manager, camera_manager
     running = True
     stack = [start_mode]
     time_manager = TimeManager(fixed_dt=1 / 60.0, max_frame_time=0.25)
+    camera_manager = CameraManager(screen_width,screen_height,world_width,world_height)
     start_mode.init()
 
 
@@ -60,6 +63,7 @@ def run(start_mode):
         stack[-1].handle_events()
         while time_manager.consume_fixed():
             stack[-1].update()
+            camera_manager.update(time_manager.get_fixed_dt())
         stack[-1].draw()
 
         # 고정 물리 스텝
