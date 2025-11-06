@@ -16,12 +16,12 @@ key_manager = None
 
 
 def handle_events():
-    event_list = get_events()
-    for event in event_list:
-        if event.type == SDL_QUIT:
-            game_framework.quit()
+    global key_manager
 
+    key_manager.update()
 
+    if key_manager.quit:
+        game_framework.quit()
 
 
 def init():
@@ -40,7 +40,18 @@ def init():
     penintent = Penintent(anim_manager)  # anim_manager 인자 추가
     game_world.add_object(penintent,1)
 
+
+
 def update():
+    camera_speed = 5
+    if key_manager.is_down(SDLK_LEFT):
+        game_framework.camera_manager.move(-camera_speed, 0)
+    if key_manager.is_down(SDLK_RIGHT):
+        game_framework.camera_manager.move(camera_speed, 0)
+    if key_manager.is_down(SDLK_UP):
+        game_framework.camera_manager.move(0, camera_speed)
+    if key_manager.is_down(SDLK_DOWN):
+        game_framework.camera_manager.move(0, -camera_speed)
     game_world.update()
 def draw():
     clear_canvas()
