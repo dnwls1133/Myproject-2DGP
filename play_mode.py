@@ -1,5 +1,4 @@
 from pico2d import *
-from machine.key_manager import KeyManager
 
 from machine.animation import AnimationManager
 from machine.animation import register_animations
@@ -11,24 +10,23 @@ from penintent import Penintent
 # 애니메이션 매니저 초기화
 anim_manager = None
 
-# Key Manager 초기화
-key_manager = None
+
 
 
 def handle_events():
-    global key_manager
 
-    key_manager.update()
 
-    if key_manager.quit:
+
+
+    if game_framework.key_manager.quit:
         game_framework.quit()
 
 
 def init():
-    global anim_manager, key_manager
+    global anim_manager
 
     anim_manager = AnimationManager()
-    key_manager = KeyManager()
+
 
     try:
         # 애니메이션 등록
@@ -44,13 +42,13 @@ def init():
 
 def update():
     camera_speed = 5
-    if key_manager.is_down(SDLK_LEFT):
+    if game_framework.key_manager.is_down(SDLK_LEFT):
         game_framework.camera_manager.move(-camera_speed, 0)
-    if key_manager.is_down(SDLK_RIGHT):
+    if game_framework.key_manager.is_down(SDLK_RIGHT):
         game_framework.camera_manager.move(camera_speed, 0)
-    if key_manager.is_down(SDLK_UP):
+    if game_framework.key_manager.is_down(SDLK_UP):
         game_framework.camera_manager.move(0, camera_speed)
-    if key_manager.is_down(SDLK_DOWN):
+    if game_framework.key_manager.is_down(SDLK_DOWN):
         game_framework.camera_manager.move(0, -camera_speed)
     game_world.update()
 def draw():
