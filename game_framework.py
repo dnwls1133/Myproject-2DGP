@@ -1,6 +1,10 @@
+import time
+from time_manager import TimeManager
+
+frame_time = 0.0
 running = None
 stack = None
-
+time_manager = None
 
 def change_mode(mode):
     global stack
@@ -45,10 +49,17 @@ def run(start_mode):
     stack = [start_mode]
     start_mode.init()
 
+    time_manager = TimeManager(fixed_dt=1/60.0)
+
+
     while running:
         stack[-1].handle_events()
-        stack[-1].update()
+        while time_manager.consume_fixed():
+            stack[-1].update()
         stack[-1].draw()
+
+        # 고정 물리 스텝
+
 
     # repeatedly delete the top of the stack
     while (len(stack) > 0):
