@@ -1,5 +1,5 @@
 import time
-from time_manager import TimeManager
+from machine.time_manager import TimeManager
 
 frame_time = 0.0
 running = None
@@ -44,15 +44,19 @@ def quit():
 
 
 def run(start_mode):
-    global running, stack
+    global running, stack, time_manager
     running = True
     stack = [start_mode]
+    time_manager = TimeManager(fixed_dt=1 / 60.0, max_frame_time=0.25)
     start_mode.init()
 
-    time_manager = TimeManager(fixed_dt=1/60.0)
+
+
 
 
     while running:
+        time_manager.update()
+
         stack[-1].handle_events()
         while time_manager.consume_fixed():
             stack[-1].update()

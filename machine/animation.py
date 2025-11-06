@@ -1,5 +1,7 @@
 from pico2d import *
 import json
+import game_framework
+
 
 def register_animations(anim_manager):
     anim_manager.register_animation(
@@ -125,15 +127,18 @@ class Animation:
         self.data = animation_data['data']
         self.image = animation_data['image']
         self.current_frame = 0
-        self.frame_time = 0
+        self.frame_time = 0.0
         self.frame_delay = 0.1  # 각 프레임당 지속 시간 (초)
 
-    def update(self,delta_time):
+    def update(self):
         """애니메이션 프레임을 업데이트합니다."""
-        self.frame_time += delta_time
+        dt = game_framework.time_manager.get_fixed_dt()
+        self.frame_time += dt
+
         if self.frame_time >= self.frame_delay:
-            self.frame_time = 0
+            self.frame_time -= self.frame_delay
             self.current_frame = (self.current_frame + 1) % len(self.frames)
+
 
     def draw(self,x,y,scale=2):  # 2.5 대신 3으로 변경 (정수 배율)
         """애니메이션을 그립니다."""
@@ -155,4 +160,4 @@ class Animation:
 
     def is_animation_end(self):
         """애니메이션이 끝났는지 확인합니다."""
-        return self.current_frame >= 100
+        return self.current_frame >= len(self.frames) - 1

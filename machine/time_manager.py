@@ -20,7 +20,7 @@ class TimeManager:
         self.prev_time = current_time
 
         # 음수 방지 및 최대값 제한
-        frame_time = max(0.0, min(self.max_frame_time,self.max_frame_time - frame_time))
+        frame_time = max(0.0, min(frame_time, self.max_frame_time))
 
         self.dt = frame_time
         self.accumulator += frame_time
