@@ -168,7 +168,13 @@ class Animation:
         offset_y = frame_info.get('offsetY', 0)
 
         # 오프셋 적용
-        adjusted_x = x + offset_x * scale
+        # 좌우 반전 시 X 오프셋 보정
+        if self.flip == 'h':
+            # 반전 시 offset_x를 반대로 적용
+            adjusted_x = x - offset_x * scale
+        else:
+            adjusted_x = x + offset_x * scale
+
         adjusted_y = y + offset_y * scale
 
         screen_x , screen_y = game_framework.camera_manager.world_to_screen(

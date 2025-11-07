@@ -13,6 +13,9 @@ class Idle:
         self.penintent = penintent
 
     def enter(self, e):
+
+
+
         self.penintent.set_animation('idle')
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
@@ -65,10 +68,10 @@ class Run:
         self.penintent.vx = self.penintent.move_speed
         if events.d_down(e) or events.a_up(e):
             self.penintent.face_dir = 1
-            self.penintent.vx = self.penintent.move_speed
+
         elif events.a_down(e) or events.d_up(e):
             self.penintent.face_dir = -1
-            self.penintent.face_dir = -1 * 5
+
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
         else:
@@ -189,6 +192,10 @@ class Stop_Run:
             self.penintent.current_animation.set_flip('h')
 
     def exit(self, e):
+        #Idle로 전환할 때 입력 초기화
+        if e == ('ANIMATION_END',None):
+            game_framework.key_manager.clear_pressed_events()
+            game_framework.key_manager.clear_released_events()
         pass
 
     def do(self):
@@ -445,11 +452,15 @@ class Penintent:
                 self.IDLE: {events.a_down: self.START_RUN, events.d_down: self.START_RUN, events.a_up: self.START_RUN, events.d_up: self.START_RUN,
                             events.s_down: self.CROUCH, events.space_down: self.JUMP, events.k_down: self.ATTACK},
                 self.START_RUN: {events.animation_end: self.RUN, events.s_down: self.CROUCH, events.space_down: self.JUMP,
-                                 events.k_down: self.ATTACK,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN},
+                                 events.k_down: self.ATTACK,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN,
+                                 events.a_down: self.STOP_RUN, events.d_down:self.STOP_RUN},
                 self.RUN: {events.space_down: self.JUMP , events.a_up : self.STOP_RUN, events.d_up: self.STOP_RUN,
                            events.s_down: self.CROUCH, events.a_down: self.STOP_RUN, events.d_down: self.STOP_RUN,
                            events.k_down: self.ATTACK},
-                self.STOP_RUN: {events.animation_end: self.IDLE, events.s_down: self.CROUCH},
+                self.STOP_RUN: {events.animation_end: self.IDLE, events.s_down: self.CROUCH,
+                                events.a_down: self.START_RUN, events.d_down: self.START_RUN,
+                                events.a_up: self.START_RUN, events.d_up: self.START_RUN
+                                },
                 self.ATTACK: {events.animation_end: self.IDLE},
                 self.CROUCH: {events.s_up: self.CROUCH_UP},
                 self.CROUCH_UP: {events.animation_end: self.IDLE},

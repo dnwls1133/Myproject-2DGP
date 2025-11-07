@@ -52,6 +52,16 @@ class KeyManager:
     def get_released_events(self):
         """이번 프레임에 떼어진 키의 SDL 이벤트 객체 리스트 반환"""
         return self._released_events
+
+    def clear_pressed_events(self):
+        """이번 프레임에 눌린 키의 SDL 이벤트 객체 리스트 초기화"""
+        self._pressed_events.clear()
+
+    def clear_released_events(self):
+        """이번 프레임에 떼어진 키의 SDL 이벤트 객체 리스트 초기화"""
+        self._released_events.clear()
+
+
     def any_pressed(self):
         """이번 프레임에 눌려진 키가 하나라도 있는지 여부 반환"""
         return bool(self._pressed)
