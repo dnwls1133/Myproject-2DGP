@@ -129,6 +129,11 @@ class Animation:
         self.current_frame = 0
         self.frame_time = 0.0
         self.frame_delay = 0.1  # 각 프레임당 지속 시간 (초)
+        self.flip = ''  # 'h' for horizontal flip, '' for normal
+
+    def set_flip(self, flip):
+        """애니메이션의 좌우 반전을 설정합니다."""
+        self.flip = flip
 
     def update(self):
         """애니메이션 프레임을 업데이트합니다."""
@@ -149,11 +154,13 @@ class Animation:
 
         screen_x , screen_y = game_framework.camera_manager.world_to_screen(x, y)
 
-        self.image.clip_draw(
+        self.image.clip_composite_draw(
             frame_info['x'],
-            self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],  # Y좌표 뒤집기
+            self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],
             frame_info['width'],
             frame_info['height'],
+            0,  # 회전 각도
+            self.flip,  # 'h' 또는 ''
             screen_x,
             screen_y,
             draw_width,
