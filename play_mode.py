@@ -15,9 +15,6 @@ anim_manager = None
 
 def handle_events():
 
-
-
-
     if game_framework.key_manager.quit:
         game_framework.quit()
 

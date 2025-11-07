@@ -91,7 +91,9 @@ class AnimationManager:
                 'width' : sprite['width'],
                 'height' : sprite['height'],
                 'x' : sprite['x'],
-                'y' : sprite['y']
+                'y' : sprite['y'],
+                'offsetX': sprite.get('offsetX', 0),  # JSON에서 읽기
+                'offsetY': sprite.get('offsetY', 0)  # JSON에서 읽기
             }
             frames.append(frame_info)
 
@@ -128,8 +130,18 @@ class Animation:
         self.image = animation_data['image']
         self.current_frame = 0
         self.frame_time = 0.0
-        self.frame_delay = 0.1  # 각 프레임당 지속 시간 (초)
+        self.frame_delay = 0.05  # 각 프레임당 지속 시간 (초)
         self.flip = ''  # 'h' for horizontal flip, '' for normal
+        self.stop_point = len(self.frames) -1  # 애니메이션이 멈출 프레임 인덱스
+
+        # 애니메이션별 오프셋 (숙이기, 점프 등)
+        self.offset_x = 0
+        self.offset_y = 0
+
+    def set_offset(self,offset_x,offset_y):
+        """애니메이션 오프셋을 설정합니다."""
+        self.offset_x = offset_x
+        self.offset_y = offset_y
 
     def set_flip(self, flip):
         """애니메이션의 좌우 반전을 설정합니다."""
@@ -142,7 +154,7 @@ class Animation:
 
         if self.frame_time >= self.frame_delay:
             self.frame_time -= self.frame_delay
-            self.current_frame = (self.current_frame + 1) % len(self.frames)
+            self.current_frame = (self.current_frame + 1) % (self.stop_point + 1)
 
 
     def draw(self,x,y,scale=2):  # 2.5 대신 3으로 변경 (정수 배율)
@@ -152,7 +164,16 @@ class Animation:
         draw_width = int(frame_info['width'] * scale)
         draw_height = int(frame_info['height'] * scale)
 
-        screen_x , screen_y = game_framework.camera_manager.world_to_screen(x, y)
+        offset_x = frame_info.get('offsetX', 0)
+        offset_y = frame_info.get('offsetY', 0)
+
+        # 오프셋 적용
+        adjusted_x = x + offset_x * scale
+        adjusted_y = y + offset_y * scale
+
+        screen_x , screen_y = game_framework.camera_manager.world_to_screen(
+            adjusted_x, adjusted_y
+        )
 
         self.image.clip_composite_draw(
             frame_info['x'],
@@ -167,6 +188,17 @@ class Animation:
             draw_height
         )
 
+    def set_stop_point(self, stop_point):
+        """애니메이션이 멈출 프레임을 설정합니다."""
+        if 0 <= stop_point < len(self.frames):
+            self.stop_point = stop_point
+        else:
+            print(f"Warning: Invalid stop_point {stop_point}. Must be between 0 and {len(self.frames)-1}")
+
+    def reset_stop_point(self):
+        """stop_point를 마지막 프레임으로 재설정합니다."""
+        self.stop_point = len(self.frames) - 1
+
     def is_animation_end(self):
         """애니메이션이 끝났는지 확인합니다."""
-        return self.current_frame >= len(self.frames) - 1
+        return self.current_frame >= self.stop_point

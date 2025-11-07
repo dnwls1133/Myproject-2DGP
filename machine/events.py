@@ -61,11 +61,14 @@ def shift_down(e):
 def shift_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_LSHIFT
 
+def k_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_k
+def k_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_k
 
 # 타임아웃 이벤트
-def time_out(e):
-    return e[0] == 'TIMEOUT'
+time_out = lambda e: e[0] == 'TIMEOUT'
 
 # 애니메이션 종료 이벤트
-def animation_end(e):
-    return e[0] == 'ANIMATION_END'
+animation_end = lambda e: e[0] == 'ANIMATION_END'
+collision = lambda e: e[0] == 'COLLISION'
