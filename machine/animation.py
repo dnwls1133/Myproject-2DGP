@@ -64,7 +64,21 @@ def register_animations(anim_manager):
         "sprites/player/texture2d/player_parry/penitent_parry_anim.json",
         "sprites/player/texture2d/player_parry/penitent_parry_anim.png"
     )
-
+    anim_manager.register_animation(
+        'jump',
+        "sprites/player/texture2d/player_jump/penitent_jump_anim.json",
+        "sprites/player/texture2d/player_jump/penitent_jump_anim.png"
+    )
+    anim_manager.register_animation(
+        'jump_off',
+        "sprites/player/texture2d/player_jump/penitent_jump_off_anim.json",
+        "sprites/player/texture2d/player_jump/penitent_jump_off_anim.png"
+    )
+    anim_manager.register_animation(
+        'jump_front',
+        "sprites/player/texture2d/player_jump/penitent_jum_forward_anim.json",
+        "sprites/player/texture2d/player_jump/penitent_jum_forward_anim.png"
+    )
     anim_manager.register_animation(
         'elder_boss_jump',
         "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.json",
@@ -137,6 +151,10 @@ class Animation:
         # 애니메이션별 오프셋 (숙이기, 점프 등)
         self.offset_x = 0
         self.offset_y = 0
+
+    def set_delay(self,frame_delay):
+        """프레임 지연 시간을 설정합니다."""
+        self.frame_delay = frame_delay
 
     def set_offset(self,offset_x,offset_y):
         """애니메이션 오프셋을 설정합니다."""

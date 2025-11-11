@@ -25,6 +25,7 @@ def a_down(e):
 def a_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_a
 
+
 def d_down(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_d
 
@@ -72,3 +73,9 @@ time_out = lambda e: e[0] == 'TIMEOUT'
 # 애니메이션 종료 이벤트
 animation_end = lambda e: e[0] == 'ANIMATION_END'
 collision = lambda e: e[0] == 'COLLISION'
+return_to_previous = lambda e: e[0] == 'RETURN'
+all_keys_up = lambda e: e[0] == 'ALL_KEYS_UP'
+a_held = lambda e: e[0] == 'A_HELD'
+d_held = lambda e: e[0] == 'D_HELD'
+s_held = lambda e: e[0] == 'S_HELD'
+w_held = lambda e: e[0] == 'W_HELD'

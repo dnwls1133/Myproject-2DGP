@@ -20,6 +20,20 @@ class CameraManager:
 
         self.lerp_speed = 0.1  # 보간 속도 (0~1)
 
+        # 추가: 타겟 객체 또는 좌표 콜러블
+        self._target = None
+
+        # 추가: 경계에서 다시 따라오기 위한 내부 여유(픽셀)
+        # 예: 50px 만큼 내부로 들어오면 카메라가 다시 플레이어를 따라옴
+        self.follow_margin = 10
+
+    def set_target(self, obj_or_callable):
+        """객체(속성 x,y) 또는 (-> (x,y)) 콜러블을 타겟으로 설정."""
+        self._target = obj_or_callable
+
+    def clear_target(self):
+        self._target = None
+
     def move(self,dx,dy):
         """카메라 타겟 위치를 이동시킵니다."""
         self.camera_x += dx
@@ -39,14 +53,83 @@ class CameraManager:
         self.shake_time = 0.0
 
     def update(self,dt):
-        """카메라 위치를 타겟 위치로 부드럽게 이동시킵니다."""
+        tx = self.target_x
+        ty = self.target_y
+
+        if self._target is not None:
+            try:
+                if callable(self._target):
+                    tx, ty = self._target()
+                else:
+                    tx = getattr(self._target, 'x')
+                    ty = getattr(self._target, 'y')
+                tx = float(tx)
+                ty = float(ty)
+            except Exception:
+                pass
+
+        # X축 처리
+        if self.world_width is not None:
+            half_w = self.screen_width / 2
+            cam_min = half_w
+            cam_max = self.world_width - half_w
+
+            # 현재 카메라가 왼쪽/오른쪽 경계에 있는지 확인
+            at_left = abs(self.camera_x - cam_min) < 1.0
+            at_right = abs(self.camera_x - cam_max) < 1.0
+
+            if at_left:
+                # 왼쪽 경계: 타겟이 경계에서 follow_margin만큼 안쪽에 있으면 추적 재개
+                if tx >= cam_min + self.follow_margin:
+                    desired_target_x = tx
+                else:
+                    desired_target_x = cam_min
+            elif at_right:
+                # 오른쪽 경계: 타겟이 경계에서 follow_margin만큼 안쪽에 있으면 추적 재개
+                if tx <= cam_max - self.follow_margin:
+                    desired_target_x = tx
+                else:
+                    desired_target_x = cam_max
+            else:
+                # 일반 구간: 경계 클램프
+                desired_target_x = max(cam_min, min(tx, cam_max))
+        else:
+            desired_target_x = tx
+
+        # Y축 처리
+        if self.world_height is not None:
+            half_h = self.screen_height / 2
+            cam_min_y = half_h
+            cam_max_y = self.world_height - half_h
+
+            at_top = abs(self.camera_y - cam_min_y) < 1.0
+            at_bottom = abs(self.camera_y - cam_max_y) < 1.0
+
+            if at_top:
+                if ty >= cam_min_y + self.follow_margin:
+                    desired_target_y = ty
+                else:
+                    desired_target_y = cam_min_y
+            elif at_bottom:
+                if ty <= cam_max_y - self.follow_margin:
+                    desired_target_y = ty
+                else:
+                    desired_target_y = cam_max_y
+            else:
+                desired_target_y = max(cam_min_y, min(ty, cam_max_y))
+        else:
+            desired_target_y = ty
+
+        self.target_x = desired_target_x
+        self.target_y = desired_target_y
+
+        # 보간
         self.camera_x += (self.target_x - self.camera_x) * self.lerp_speed
         self.camera_y += (self.target_y - self.camera_y) * self.lerp_speed
 
-        # 화면 흔딜림 효과
+        # 화면 흔들림
         shake_x = 0
         shake_y = 0
-
         if hasattr(self, 'shake_time') and self.shake_time < self.shake_duration:
             import random
             self.shake_time += dt
@@ -57,14 +140,13 @@ class CameraManager:
         final_x = self.camera_x + shake_x
         final_y = self.camera_y + shake_y
 
-        # 월드 경계 내로 카메라 위치 제한
+        # 최종 경계 클램프
         if self.world_width is not None:
-            half_screen_w = self.screen_width / 2
-            final_x = max(half_screen, min(final_x, self.world_width - half_screen))
-
+            half_w = self.screen_width / 2
+            final_x = max(half_w, min(final_x, self.world_width - half_w))
         if self.world_height is not None:
-            half_screen_h = self.screen_height / 2
-            final_y = max(half_screen, min(final_y, self.world_height - half_screen))
+            half_h = self.screen_height / 2
+            final_y = max(half_h, min(final_y, self.world_height - half_h))
 
         self.camera_x = final_x
         self.camera_y = final_y

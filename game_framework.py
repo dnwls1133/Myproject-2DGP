@@ -2,7 +2,7 @@ import time
 from machine.time_manager import TimeManager
 from machine.camera_manager import CameraManager
 from machine.key_manager import KeyManager
-
+import machine.collider_manager
 
 frame_time = 0.0
 running = None
@@ -48,7 +48,7 @@ def quit():
     running = False
 
 
-def run(start_mode,screen_width=1080,screen_height=1024,world_width=None,world_height=None):
+def run(start_mode,screen_width=1080,screen_height=500,world_width=5000,world_height=None):
     global running, stack, time_manager, camera_manager, key_manager
     running = True
     stack = [start_mode]
@@ -67,6 +67,7 @@ def run(start_mode,screen_width=1080,screen_height=1024,world_width=None,world_h
         stack[-1].handle_events()
         while time_manager.consume_fixed():
             stack[-1].update()
+            machine.collider_manager.check_all_collisions()
             camera_manager.update(time_manager.get_fixed_dt())
             key_manager.update()
         stack[-1].draw()

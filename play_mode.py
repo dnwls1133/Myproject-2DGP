@@ -4,8 +4,9 @@ from machine.animation import AnimationManager
 from machine.animation import register_animations
 import game_world
 import game_framework
+import machine.collider_manager
 from penintent import Penintent
-
+from brotherhood_background_0 import BrotherhoodBackground0
 
 # 애니메이션 매니저 초기화
 anim_manager = None
@@ -22,6 +23,8 @@ def handle_events():
 def init():
     global anim_manager
 
+    machine.collider_manager.clear_collision_pairs()
+
     anim_manager = AnimationManager()
 
 
@@ -31,6 +34,9 @@ def init():
         print("애니메이션 등록 완료")
     except Exception as e:
         print(f"애니메이션 등록 실패: {e}")
+
+    background_0 = BrotherhoodBackground0()
+    game_world.add_object(background_0,0)
 
     penintent = Penintent(anim_manager)  # anim_manager 인자 추가
     game_world.add_object(penintent,1)
@@ -55,7 +61,7 @@ def draw():
 
 def finish():
     game_world.clear()
-
+    machine.collider_manager.clear_collision_pairs()
 def pause():
     pass
 
