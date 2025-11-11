@@ -1,4 +1,6 @@
 from pico2d import *
+import game_framework
+
 
 class Collider:
     def __init__(self, owner, offset_x=0, offset_y=0, width=0, height=0):
@@ -8,6 +10,24 @@ class Collider:
         self.width = width # 충돌체의 너비
         self.height = height # 충돌체의 높이
         self.active = True # 충돌체 활성화 여부
+
+    def set_offset(self, offset_x, offset_y):
+        """충돌체 오프셋 설정"""
+        self.offset_x = offset_x
+        self.offset_y = offset_y
+
+    def set_size(self, width, height):
+        """충돌체 크기 설정"""
+        self.width = width
+        self.height = height
+
+    def set_offset_and_size(self, offset_x, offset_y, width, height):
+        """충돌체 오프셋 및 크기 설정"""
+        self.offset_x = offset_x
+        self.offset_y = offset_y
+        self.width = width
+        self.height = height
+
 
     def get_bb(self):
         """바운딩 박스 좌표 반환 (left, bottom, right, top)"""
@@ -54,5 +74,11 @@ class Collider:
         if bb is None:
             return
 
+        """디버그용 충돌 박스 그리기"""
         left, bottom, right, top = bb
-        draw_rectangle(left, bottom, right, top)
+
+        # 월드 좌표를 스크린 좌표로 변환
+        screen_left, screen_bottom = game_framework.camera_manager.world_to_screen(left, bottom)
+        screen_right, screen_top = game_framework.camera_manager.world_to_screen(right, top)
+
+        draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)

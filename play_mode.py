@@ -53,6 +53,8 @@ def update():
         game_framework.camera_manager.move(0, camera_speed)
     if game_framework.key_manager.is_down(SDLK_DOWN):
         game_framework.camera_manager.move(0, -camera_speed)
+    if game_framework.key_manager.is_down(SDLK_p):
+        game_framework.camera_manager.shake(10,0.5)
     game_world.update()
 def draw():
     clear_canvas()

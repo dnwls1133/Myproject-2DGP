@@ -54,11 +54,23 @@ class Attack:
 
 
     def exit(self, e):
+        self.penintent.attack_collider.active = False
         pass
 
     def do(self):
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
+
+
+            # 공격 판정 프레임 구간 설정 (예: 3~7 프레임)
+            current_frame = self.penintent.current_animation.current_frame
+            if 3 <= current_frame <= 7:
+                self.penintent.attack_collider.active = True
+            else:
+                self.penintent.attack_collider.active = False
+
+
+
             if self.penintent.current_animation.is_animation_end():
                 # ✅ Attack 종료 시 현재 키 상태 확인
                 key_manager = game_framework.key_manager
@@ -428,7 +440,9 @@ class Dodge:
                 if a_held or d_held or s_held:
                     # 이동 키가 눌려있으면 RUN으로
                     if a_held:
-                        if d_pressed or s_pressed:
+                        if s_pressed:
+                            self.penintent.state_machine.handle_state_event(('S_HELD', None))
+                        elif d_pressed:
                             self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
 
                         else:
@@ -436,7 +450,9 @@ class Dodge:
 
 
                     elif d_held:
-                        if a_pressed or s_pressed:
+                        if s_pressed:
+                            self.penintent.state_machine.handle_state_event(('S_HELD', None))
+                        elif a_pressed:
                             self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
                         else:
                             self.penintent.state_machine.handle_state_event(('D_HELD', None))
@@ -504,40 +520,88 @@ class Parry_Failed:
         self.penintent = penintent
 
     def enter(self, e):
-        self.penintent.set_animation('idle')
+        self.penintent.set_animation('parry_failed')
+        self.penintent.collider.active = False
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
         else:
             self.penintent.current_animation.set_flip('h')
 
     def exit(self, e):
+        self.penintent.collider.active = True
         pass
 
     def do(self):
+        # ✅ Attack 종료 시 현재 키 상태 확인
+        key_manager = game_framework.key_manager
+
+        # 이동 키가 눌려있는지 확인
+        a_pressed = key_manager.is_down(SDLK_a)
+        d_pressed = key_manager.is_down(SDLK_d)
+        s_pressed = key_manager.is_down(SDLK_s)
+
+        a_held = key_manager.is_held(SDLK_a)
+        d_held = key_manager.is_held(SDLK_d)
+        s_held = key_manager.is_held(SDLK_s)
+
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
+            if self.penintent.current_animation.is_animation_end():
+                if a_held or d_held or s_held:
+                    # 이동 키가 눌려있으면 RUN으로
+                    if a_held:
+                        if s_pressed:
+                            self.penintent.state_machine.handle_state_event(('S_HELD', None))
+                        elif d_pressed:
+                            self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+
+                        else:
+                            self.penintent.state_machine.handle_state_event(('A_HELD', None))
+
+
+                    elif d_held:
+                        if s_pressed:
+                            self.penintent.state_machine.handle_state_event(('S_HELD', None))
+                        elif a_pressed:
+                            self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+                        else:
+                            self.penintent.state_machine.handle_state_event(('D_HELD', None))
+
+                    elif s_held:
+                        if a_pressed or d_pressed:
+                            self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+                        else:
+                            self.penintent.state_machine.handle_state_event(('S_HELD', None))
+                else:
+                    self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
 
     def draw(self):
         if self.penintent.current_animation:
             self.penintent.current_animation.draw(self.penintent.x, self.penintent.y)
+            if self.penintent.current_animation.is_animation_end():
+                self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
     pass
 class Parry_Success:
     def __init__(self, penintent):
         self.penintent = penintent
 
     def enter(self, e):
-        self.penintent.set_animation('idle')
+        self.penintent.set_animation('parry_success')
+        self.penintent.collider.active = False
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
         else:
             self.penintent.current_animation.set_flip('h')
 
     def exit(self, e):
+        self.penintent.collider.active = True
         pass
 
     def do(self):
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
+            if self.penintent.current_animation.is_animation_end():
+                self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
 
     def draw(self):
         if self.penintent.current_animation:
@@ -550,7 +614,7 @@ class Jump:
         self.upandown = 0
     def enter(self, e):
         self.penintent.set_animation('jump')
-        self.penintent.current_animation.set_delay(0.1)
+        self.penintent.current_animation.set_delay(0.2)
         self.upandown = 0
         # ✅ Attack 종료 시 현재 키 상태 확인
         key_manager = game_framework.key_manager
@@ -650,7 +714,7 @@ class Jump:
             if self.penintent.current_animation.is_animation_end():
                 if self.upandown == 0:
                     self.penintent.set_animation('jump_off')
-                    self.penintent.current_animation.set_delay(0.2)
+                    self.penintent.current_animation.set_delay(0.1)
                     self.upandown = 1
                 elif self.upandown == 1:
                     if a_held or d_held:
@@ -682,6 +746,29 @@ class Penintent:
         game_framework.camera_manager.set_target(self)
 
         self.collider = Collider(self, offset_x=0, offset_y=0, width=40, height=90)
+
+        # 공격 충돌체 (기본적으로 비활성화)
+        self.attack_collider = Collider(self, offset_x = 60, offset_y = 0, width = 80, height = 90)
+        self.attack_collider.active = False
+
+        # 애니메이션별 콜라이더 프리셋: (offset_x, offset_y, width, height)
+        # 필요하면 애니메이션 이름과 값들을 튜닝
+        self.collider_presets = {
+            'idle': {'offset_x': 20, 'offset_y': 0, 'width': 40, 'height': 90},
+            'run': {'offset_x': 20, 'offset_y': 0, 'width': 40, 'height': 90},
+            'start_run': {'offset_x': 10, 'offset_y': 0, 'width': 40, 'height': 90},
+            'stop_run': {'offset_x': 20, 'offset_y': 0, 'width': 40, 'height': 90},
+            'crouch': {'offset_x': 20, 'offset_y': -20, 'width': 40, 'height': 60},
+            'crouch_up': {'offset_x': 20, 'offset_y': 0, 'width': 40, 'height': 90},
+            'dodge': {'offset_x': 0, 'offset_y': -30, 'width': 50, 'height': 50},
+            'attack': {'offset_x': 0, 'offset_y': 0, 'width': 60, 'height': 90},
+            'jump': {'offset_x': 0, 'offset_y': 0, 'width': 40, 'height': 90},
+            # 필요 시 더 추가
+        }
+        self.attack_collider_presets = {
+            'attack': {'offset_x': 60, 'offset_y': 10, 'width': 80, 'height': 60}
+        }
+
         # 애니메이션 이름 리스트
         anim_names = [
             'idle', 'attack', 'run', 'start_run', 'stop_run',
@@ -699,13 +786,13 @@ class Penintent:
         self.on_ground = False
 
         # 물리 상수
-        self.gravity = -1033.0  # 중력 가속도
+        self.gravity = -1233.0  # 중력 가속도
         self.max_fall_speed = -1000.0  # 최대 낙하 속도
         self.friction = 0.8  # 마찰 계수
 
         # 이동 상수
         self.move_speed = 300.0  # 이동 속도
-        self.jump_speed = 454.5  # 점프 속도
+        self.jump_speed = 600.0  # 점프 속도
 
 
 
@@ -742,13 +829,14 @@ class Penintent:
             {
                 self.IDLE: {events.a_down: self.START_RUN, events.d_down: self.START_RUN, events.a_up: self.START_RUN, events.d_up: self.START_RUN,
                             events.s_down: self.CROUCH, events.space_down: self.JUMP, events.k_down: self.ATTACK,
-                             events.shift_down : self.DODGE},
+                             events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED},
                 self.START_RUN: {events.animation_end: self.RUN, events.s_down: self.CROUCH, events.space_down: self.JUMP,
                                  events.k_down: self.ATTACK,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN,
-                                 events.a_down: self.STOP_RUN, events.d_down:self.STOP_RUN,events.shift_down : self.DODGE},
+                                 events.a_down: self.STOP_RUN, events.d_down:self.STOP_RUN,events.shift_down : self.DODGE,
+                                 events.j_down: self.PARRY_FAILED},
                 self.RUN: {events.space_down: self.JUMP , events.a_up : self.STOP_RUN, events.d_up: self.STOP_RUN,
                            events.s_down: self.CROUCH, events.a_down: self.STOP_RUN, events.d_down: self.STOP_RUN,
-                           events.k_down: self.ATTACK,events.shift_down : self.DODGE},
+                           events.k_down: self.ATTACK,events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED},
                 self.STOP_RUN: {events.animation_end: self.IDLE, events.s_down: self.CROUCH,
                                 events.a_down: self.START_RUN, events.d_down: self.START_RUN,
                                 events.a_up: self.START_RUN, events.d_up: self.START_RUN
@@ -756,7 +844,8 @@ class Penintent:
                 self.ATTACK: {events.all_keys_up: self.IDLE,
                 events.a_held: self.START_RUN,
                 events.d_held: self.START_RUN},
-                self.CROUCH: {events.s_up: self.CROUCH_UP,events.shift_down : self.DODGE},
+                self.CROUCH: {events.s_up: self.CROUCH_UP,events.shift_down : self.DODGE,
+                              events.j_down: self.PARRY_FAILED},
                 self.CROUCH_UP: {events.animation_end: self.IDLE,
                                  events.all_keys_up: self.IDLE,
                                  events.a_held: self.START_RUN,
@@ -770,10 +859,79 @@ class Penintent:
                     events.a_held: self.START_RUN,
                     events.d_held: self.START_RUN,
                     events.s_held: self.CROUCH,
-                    events.all_keys_up: self.IDLE
-                }
+                    events.all_keys_up: self.IDLE,
+                    events.j_down: self.PARRY_FAILED
+                },
+                self.PARRY_FAILED: {events.animation_end: self.IDLE,
+                                    events.a_held: self.START_RUN,
+                                    events.d_held: self.START_RUN,
+                                    events.s_held: self.CROUCH,
+                                    events.all_keys_up: self.IDLE
+                                    }
             }
         )
+    def apply_attack_collider_preset(self, ani_name):
+        """공격 충돌체 프리셋 적용"""
+        preset = self.attack_collider_presets.get(ani_name)
+        if not preset:
+            self.attack_collider.active = False
+            return
+
+        ox = preset['offset_x']
+        oy = preset['offset_y']
+        w = preset['width']
+        h = preset['height']
+
+        # 방향에 따라 x offset 반전
+        if self.face_dir == -1:
+            ox = -ox
+
+        self.attack_collider.set_offset_and_size(ox, oy, w, h)
+        self.attack_collider.active = True
+
+
+    def apply_collider_preset(self, ani_name):
+        preset = self.collider_presets.get(ani_name)
+        if not preset:
+            return
+
+        ox = preset['offset_x']
+        oy = preset['offset_y']
+        w = preset['width']
+        h = preset['height']
+
+        if self.face_dir == -1:
+            ox = -ox
+
+        # Collider 구현에 따라 가능한 API를 시도해서 적용 (호한성 확보)
+        if hasattr(self.collider, 'set_offset_and_size'):
+            # 통합 API가 있으면 가장 간단하게 호출
+            try:
+                self.collider.set_offset_and_size(ox, oy, w, h)
+                return
+            except Exception:
+                pass
+
+                # 개별 메서드/속성으로 설정 (존재 여부에 따라)
+                if hasattr(self.collider, 'set_offset'):
+                    try:
+                        self.collider.set_offset(ox, oy)
+                    except Exception:
+                        setattr(self.collider, 'offset_x', ox)
+                        setattr(self.collider, 'offset_y', oy)
+                else:
+                    setattr(self.collider, 'offset_x', ox)
+                    setattr(self.collider, 'offset_y', oy)
+
+                if hasattr(self.collider, 'set_size'):
+                    try:
+                        self.collider.set_size(w, h)
+                    except Exception:
+                        setattr(self.collider, 'width', w)
+                        setattr(self.collider, 'height', h)
+                else:
+                    setattr(self.collider, 'width', w)
+                    setattr(self.collider, 'height', h)
 
     def clamp_to_world(self):
         """월드 경계 내로 위치 제한"""
@@ -792,6 +950,13 @@ class Penintent:
             self.current_animation.current_frame = 0
             self.current_animation.frame_time = 0
 
+            self.apply_collider_preset(name)
+
+            if name == 'attack':
+                self.apply_attack_collider_preset(name)
+            else:
+                self.attack_collider.active = False
+
     def handle_input(self):
         pass
 
@@ -807,11 +972,26 @@ class Penintent:
 
         self.state_machine.update()
 
+        # 위치 변경 후 콜라이더의 월드 좌표를 동기화 (Collider 구현에 따라 다르게 처리)
+        # 일반적으로 Collider는 owner(=self)의 x,y와 offset를 사용하지만,
+        # # 만약 수동 동기화가 필요하면 아래처럼 설정.
+        # ox = getattr(self.collider, 'offset_x', None)
+        # oy = getattr(self.collider, 'offset_y', None)
+        #
+        # # Collider에 update_position 같은 메서드가 있으면 호출
+        # if hasattr(self.collider, 'update_position'):
+        #     try:
+        #         self.collider.update_position(self.x + ox, self.y + oy)
+        #     except Exception:
+        #         # 실패하면 속성으로 직접 설정
+        #         setattr(self.collider, 'x', self.x + ox)
+        #         setattr(self.collider, 'y', self.y + oy)
+        # else:
+        #     setattr(self.collider, 'x', self.x + ox)
+        #     setattr(self.collider, 'y', self.y + oy)
 
-
-
-        # if self.current_animation:
-        #     self.current_animation.update()
+        # 이후 필요하면 애니메이션 프레임별로 콜라이더를 더 잘 조정하도록
+        # current_animation.current_frame 등을 참조해 동적으로 offset/size를 바꿀 수 있음.
 
     def handle_event(self, event):
         pass
@@ -822,3 +1002,5 @@ class Penintent:
             self.current_animation.draw(self.x,self.y)
 
         self.collider.draw_debug()
+        if self.attack_collider.active:
+            self.attack_collider.draw_debug()

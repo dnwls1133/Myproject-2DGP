@@ -67,6 +67,11 @@ def k_down(e):
 def k_up(e):
     return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_k
 
+def j_down(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYDOWN and e[1].key == SDLK_j
+def j_up(e):
+    return e[0] == 'INPUT' and e[1].type == SDL_KEYUP and e[1].key == SDLK_j
+
 # 타임아웃 이벤트
 time_out = lambda e: e[0] == 'TIMEOUT'
 
