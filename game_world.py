@@ -1,6 +1,6 @@
 import machine.collider_manager
 
-world = [[], [], []]  # layers for game objects
+world = [[] for _ in range(7)]  # layers for game objects
 
 def add_object(o, depth):
     world[depth].append(o)

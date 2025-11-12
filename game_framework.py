@@ -48,7 +48,7 @@ def quit():
     running = False
 
 
-def run(start_mode,screen_width=1080,screen_height=500,world_width=5000,world_height=None):
+def run(start_mode,screen_width=1080,screen_height=500,world_width=1600,world_height=None):
     global running, stack, time_manager, camera_manager, key_manager
     running = True
     stack = [start_mode]

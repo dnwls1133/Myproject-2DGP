@@ -7,6 +7,10 @@ import game_framework
 import machine.collider_manager
 from penintent import Penintent
 from brotherhood_background_0 import BrotherhoodBackground0
+from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles
+
+
+from tilemap import TileMap
 
 # 애니메이션 매니저 초기화
 anim_manager = None
@@ -35,11 +39,26 @@ def init():
     except Exception as e:
         print(f"애니메이션 등록 실패: {e}")
 
-    background_0 = BrotherhoodBackground0()
-    game_world.add_object(background_0,0)
+
+    # 타일맵 로드
+    tilemap_bg = TileMap()
+    tilemap_bg.load_tile_images(bg_tiles)
+    tilemap_bg.load_from_file('start_map_bg.json')
+    game_world.add_object(tilemap_bg,1)
+
+    tilemap_terrain = TileMap()
+    tilemap_terrain.load_tile_images(terrain_tiles)
+    tilemap_terrain.load_from_file('start_map.json')
+    game_world.add_object(tilemap_terrain, 2)
+
+    tilemap_deco = TileMap()
+    tilemap_deco.load_tile_images(decoration_tiles)
+    tilemap_deco.load_from_file('start_map_decoration.json')
+    game_world.add_object(tilemap_deco, 3)
+
 
     penintent = Penintent(anim_manager)  # anim_manager 인자 추가
-    game_world.add_object(penintent,1)
+    game_world.add_object(penintent,4)
 
 
 

@@ -155,7 +155,7 @@ class Run:
 
 
         # 6. 임시 바닥 충돌
-        ground_y = 500
+        ground_y = 0
         if self.penintent.y <= ground_y:
             self.penintent.y = ground_y
             self.penintent.vy = 0
@@ -223,7 +223,7 @@ class Start_Run:
 
 
         # 6. 임시 바닥 충돌
-        ground_y = 500
+        ground_y = 0
         if self.penintent.y <= ground_y:
             self.penintent.y = ground_y
             self.penintent.vy = 0
@@ -411,7 +411,7 @@ class Dodge:
         self.penintent.y += self.penintent.vy * dt
 
         # ✅ 바닥 충돌 (나중에 맵 시스템으로 대체)
-        ground_y = 500
+        ground_y = 0
         if self.penintent.y <= ground_y:
             self.penintent.y = ground_y
             self.penintent.vy = 0
@@ -701,7 +701,7 @@ class Jump:
         self.penintent.y += self.penintent.vy * dt
 
         # 6. 임시 바닥 충돌
-        ground_y = 500
+        ground_y = 0
         if self.penintent.y <= ground_y:
             self.penintent.y = ground_y
             self.penintent.vy = 0
@@ -777,7 +777,7 @@ class Penintent:
             'jump', 'jump_off', 'jump_front'
         ]
 
-        self.x, self.y = 400,500
+        self.x, self.y = 100,0
         self.face_dir = 1
         # 물리 속성
         self.vx = 0

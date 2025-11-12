@@ -71,7 +71,7 @@ class CameraManager:
         # X축 처리
         if self.world_width is not None:
             half_w = self.screen_width / 2
-            cam_min = half_w
+            cam_min = -self.world_width + half_w
             cam_max = self.world_width - half_w
 
             # 현재 카메라가 왼쪽/오른쪽 경계에 있는지 확인
@@ -140,13 +140,13 @@ class CameraManager:
         final_x = self.camera_x + shake_x
         final_y = self.camera_y + shake_y
 
-        # 최종 경계 클램프
+        # 최종 경계 클램프 (음수 영역 포함)
         if self.world_width is not None:
             half_w = self.screen_width / 2
-            final_x = max(half_w, min(final_x, self.world_width - half_w))
+            final_x = max(-self.world_width + half_w, min(final_x, self.world_width - half_w))
         if self.world_height is not None:
             half_h = self.screen_height / 2
-            final_y = max(half_h, min(final_y, self.world_height - half_h))
+            final_y = max(-self.world_height + half_h, min(final_y, self.world_height - half_h))
 
         self.camera_x = final_x
         self.camera_y = final_y
