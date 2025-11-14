@@ -26,7 +26,7 @@ def handle_events():
 
 def init():
     global anim_manager
-
+    game_framework.camera_manager.set_zoom(3.0)  # 원본 크기
     machine.collider_manager.clear_collision_pairs()
 
     anim_manager = AnimationManager()

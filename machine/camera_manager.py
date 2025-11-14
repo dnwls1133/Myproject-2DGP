@@ -27,6 +27,10 @@ class CameraManager:
         # 예: 50px 만큼 내부로 들어오면 카메라가 다시 플레이어를 따라옴
         self.follow_margin = 10
 
+        self.window_width = screen_width / 2.0  # 기본값: 화면의 절반 = 2배 확대
+        self.window_height = screen_height / 2.0
+
+
     def set_target(self, obj_or_callable):
         """객체(속성 x,y) 또는 (-> (x,y)) 콜러블을 타겟으로 설정."""
         self._target = obj_or_callable
@@ -71,7 +75,7 @@ class CameraManager:
         # X축 처리
         if self.world_width is not None:
             half_w = self.screen_width / 2
-            cam_min = -self.world_width + half_w
+            cam_min = half_w
             cam_max = self.world_width - half_w
 
             # 현재 카메라가 왼쪽/오른쪽 경계에 있는지 확인
@@ -143,10 +147,10 @@ class CameraManager:
         # 최종 경계 클램프 (음수 영역 포함)
         if self.world_width is not None:
             half_w = self.screen_width / 2
-            final_x = max(-self.world_width + half_w, min(final_x, self.world_width - half_w))
+            final_x = max(half_w, min(final_x, self.world_width - half_w))
         if self.world_height is not None:
             half_h = self.screen_height / 2
-            final_y = max(-self.world_height + half_h, min(final_y, self.world_height - half_h))
+            final_y = max(half_h, min(final_y, self.world_height - half_h))
 
         self.camera_x = final_x
         self.camera_y = final_y
@@ -158,10 +162,29 @@ class CameraManager:
         return world_x, world_y
 
     def world_to_screen(self, world_x,world_y):
-        """월드 좌표를 화면 좌표로 변환합니다."""
-        screen_x = world_x - self.camera_x + self.screen_width // 2
-        screen_y = world_y - self.camera_y + self.screen_height // 2
+        """월드 좌표를 화면 좌표로 변환합니다. (윈도우-뷰포트 변환)"""
+        # 1. 윈도우 영역 계산 (카메라 중심 기준)
+        window_left = self.camera_x - self.window_width / 2
+        window_bottom = self.camera_y - self.window_height / 2
+
+        # 2. 월드 좌표를 윈도우 내 상대 좌표로 변환 (0~1)
+        rel_x = (world_x - window_left) / self.window_width
+        rel_y = (world_y - window_bottom) / self.window_height
+
+        # 3. 뷰포트(화면 전체)에 매핑
+        screen_x = rel_x * self.screen_width
+        screen_y = rel_y * self.screen_height
         return screen_x, screen_y
+
+    def set_window_size(self,width,height):
+        """카메라 윈도우 크기를 설정합니다. (작을수록 확대)"""
+        self.window_width = width
+        self.window_height = height
+
+    def set_zoom(self,zoom_level):
+        """줌 레벨에 따라 윈도우 크기를 조정합니다."""
+        self.window_width = self.screen_width / zoom_level
+        self.window_height = self.screen_height / zoom_level
 
     def get_position(self):
         """카메라의 현재 월드 좌표를 반환합니다."""

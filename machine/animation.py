@@ -175,12 +175,17 @@ class Animation:
             self.current_frame = (self.current_frame + 1) % (self.stop_point + 1)
 
 
-    def draw(self,x,y,scale=2):  # 2.5 대신 3으로 변경 (정수 배율)
+    def draw(self,x,y,scale=1):  # 2.5 대신 3으로 변경 (정수 배율)
         """애니메이션을 그립니다."""
         frame_info = self.frames[self.current_frame]
-        # 정수 배율로 픽셀 아트 선명도 유지
-        draw_width = int(frame_info['width'] * scale)
-        draw_height = int(frame_info['height'] * scale)
+
+        # 윈도우-뷰포트 배율 계산
+        viewport_scale_x = game_framework.camera_manager.screen_width / game_framework.camera_manager.window_width
+        viewport_scale_y = game_framework.camera_manager.screen_height / game_framework.camera_manager.window_height
+
+        # 정수 배율로 픽셀 아트 선명도 유지 + 윈도우-뷰포트 배율 적용
+        draw_width = int(frame_info['width'] * scale * viewport_scale_x)
+        draw_height = int(frame_info['height'] * scale * viewport_scale_y)
 
         offset_x = frame_info.get('offsetX', 0)
         offset_y = frame_info.get('offsetY', 0)

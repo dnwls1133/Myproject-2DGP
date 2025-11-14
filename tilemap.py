@@ -14,6 +14,7 @@ class TileMap:
         self.tile_images = {}  # 타일 ID별 이미지
         self.tile_types = {}  # tile_type -> tile_types로 수정
         self.tile_sizes = {}  # 타일 ID별 크기 정보
+        self.tile_depths = []  # 타일 ID별 깊이 정보
         self.map_width = 0
         self.map_height = 0
         self.current_file = None # 현재 작업 중인 파일 경로
@@ -36,11 +37,22 @@ class TileMap:
         self.map_width = width
         self.map_height = height
         self.tiles = [[0 for _ in range(width)] for _ in range(height)]
+        self.tile_depths = [[0 for _ in range(width)] for _ in range(height)]
 
     def set_tile(self, x, y, tile_id):
         """특정 위치에 타일 설정"""
         if 0 <= y < self.map_height and 0 <= x < self.map_width:
             self.tiles[y][x] = tile_id
+    def set_tile_depth(self, x, y, depth):
+        if 0 <= y < len(self.tile_depths) and 0 <= x < len(self.tile_depths[0]):
+            self.tile_depths[y][x] = depth
+
+    def get_tile_depth(self, x, y):
+        """타일의 깊이값을 반환합니다."""
+        if 0 <= y < len(self.tile_depths) and 0 <= x < len(self.tile_depths[0]):
+            return self.tile_depths[y][x]
+        return 0
+
 
     def get_tile(self, x, y):
         """특정 위치의 타일 ID 반환"""
@@ -51,20 +63,48 @@ class TileMap:
         """타일 ID에 해당하는 타일의 크기 반환"""
         return self.tile_sizes.get(tile_id, (32,32))
 
-    def draw(self, camera_x=0, camera_y=0,scale=2.0):
+    def draw(self, camera_x=0, camera_y=0,scale=2.0,use_camera=True):
         """타일맵을 그립니다."""
-        camera_x,camera_y = game_framework.camera_manager.get_position()
+
+        if use_camera:
+            camera_x, camera_y = game_framework.camera_manager.get_position()
+
+            # 윈도우-뷰포트 배율 계산
+            viewport_scale_x = game_framework.camera_manager.screen_width / game_framework.camera_manager.window_width
+            viewport_scale_y = game_framework.camera_manager.screen_height / game_framework.camera_manager.window_height
+        else:
+            # 에디터 모드: 카메라 사용 안함
+
+            scale = 1.0
+            viewport_scale_x = 1.0
+            viewport_scale_y = 1.0
+
+
         for y, row in enumerate(self.tiles):
             for x, tile_id in enumerate(row):
                 if tile_id > 0 and tile_id in self.tile_images:
-                    px = x * self.tile_width - camera_x + self.tile_width // 2
-                    py = y * self.tile_height - camera_y + self.tile_height // 2
-                    img  = self.tile_images[tile_id]
+                    # 월드 좌표 계산
+                    world_x = x * self.tile_width + self.tile_width / 2
+                    world_y = y * self.tile_height + self.tile_height / 2
+
+                    if use_camera:
+                        # 게임 모드: 카메라 변환 적용
+                        screen_x, screen_y = game_framework.camera_manager.world_to_screen(world_x, world_y)
+                    else:
+                        # 에디터 모드: 화면 좌표 그대로 사용
+                        screen_x = world_x - camera_x
+                        screen_y = world_y - camera_y
+                    img = self.tile_images[tile_id]
+
+                    # 윈도우-뷰포트 배율 적용된 크기
+                    draw_width = int(img.w * scale * viewport_scale_x)
+                    draw_height = int(img.h * scale * viewport_scale_y)
+
                     img.composite_draw(
                         0,  # 회전 각도 (라디안)
                         '',  # 반전 옵션 ('h' 또는 'v')
-                        px, py,  # 위치
-                        img.w * scale, img.h * scale  # 크기
+                        screen_x, screen_y,  # 위치
+                        draw_width, draw_height  # 크기
                     )
 
     def save_map_as(self):

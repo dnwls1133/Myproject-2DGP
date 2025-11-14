@@ -35,7 +35,54 @@ bg_tiles = {
 }
 
 decoration_tiles = {
-    1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': False}
+    1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_0.png', 'solid': True},
+    2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': True},
+    3: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_2.png', 'solid': True},
+    4: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_3.png', 'solid': True},
+    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': True},
+    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': True},
+    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': True},
+    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': True},
+    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': True},
+    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid': True},
+    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': True},
+    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': True},
+    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': True},
+    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': True},
+    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': True},
+    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': True},
+    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': True},
+    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': True},
+    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': True},
+    20: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_27.png', 'solid': True},
+    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': True},
+    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': True},
+    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': True},
+    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': True},
+    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': True},
+    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': True},
+    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': True},
+    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': True},
+    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': True},
+    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': True},
+    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': True},
+    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': True},
+    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': True},
+    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': True},
+    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': True},
+    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': True},
+    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': True},
+    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': True},
+    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': True},
+    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': True},
+    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': True},
+    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': True},
+    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': True},
+    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': True},
+    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': True},
+    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': True},
+    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': True},
+    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': True}
 }
 
 # terrain_tiles 수동 할당 (실제 존재하는 파일들)
@@ -92,6 +139,16 @@ terrain_tiles = {
 
 print(f"로드된 terrain 타일 개수: {len(terrain_tiles)}")
 
+layer_depths = {
+    'background': 0,
+    'decoration' : 10,
+    'terrain': 20
+}
+
+# 서브레이어 개념 추가 (같은 레이어 내에서도 깊이 구분)
+sub_layer_depth = 0  # 현재 선택된 서브레이어 깊이 (0~9)
+
+
 
 def get_current_tilemap():
     if current_layer == 'background':
@@ -122,6 +179,7 @@ def init():
     tilemap_decoration.load_tile_images(decoration_tiles)
     tilemap_terrain.load_tile_images(terrain_tiles)
 
+    game_framework.camera_manager.set_zoom(1.0)
 
 def finish():
     global tilemap_bg, tilemap_decoration, tilemap_terrain
@@ -161,8 +219,17 @@ def load_all():
     print('가능한 레이어 로드 완료')
 
 
+def set_tile_with_depth(tilemap,tile_x,tile_y,tile_id,depth):
+    tilemap.set_tile(tile_x,tile_y,tile_id)
+    tilemap.set_tile_depth(tile_x,tile_y,depth)
+
 def handle_events():
-    global selected_tile, mouse_x, mouse_y, camera_x, camera_y, is_dragging, current_layer, dragging_button
+    global selected_tile, mouse_x, mouse_y, camera_x, camera_y, is_dragging, current_layer, dragging_button, sub_layer_depth
+
+
+    # 캔버스 크기 가져오기
+    canvas_width, canvas_height = get_canvas_width(), get_canvas_height()
+
 
     # 실제 마우스 버튼 상태 체크
     mouse_state_x = ctypes.c_int()
@@ -240,9 +307,14 @@ def handle_events():
                 clear_current_layer()
             elif event.key == SDLK_l and shift_held and ctrl_held:
                 clear_all_layers()
-
+            elif event.key == SDLK_UP:
+                sub_layer_depth = min(9, sub_layer_depth + 1)
+                print(f"서브레이어 깊이: {sub_layer_depth}")
+            elif event.key == SDLK_DOWN:  # 깊이 감소
+                sub_layer_depth = max(0, sub_layer_depth - 1)
+                print(f"서브레이어 깊이: {sub_layer_depth}")
         elif event.type == SDL_MOUSEMOTION:
-            mouse_x, mouse_y = event.x, 500 - event.y
+            mouse_x, mouse_y = event.x, canvas_height - 1 - event.y
 
             if is_dragging and dragging_button is not None:
                 cur = get_current_tilemap()
@@ -250,23 +322,28 @@ def handle_events():
                     # 스냅은 그리드 기준으로
                     tile_x = (mouse_x + camera_x) // grid_size
                     tile_y = (mouse_y + camera_y) // grid_size
+
+                    depth = layer_depths[current_layer] + sub_layer_depth
+
                     if dragging_button == SDL_BUTTON_LEFT:
-                        cur.set_tile(tile_x, tile_y, selected_tile)
+                        set_tile_with_depth(cur,tile_x,tile_y,selected_tile,depth)
                     elif dragging_button == SDL_BUTTON_RIGHT:
                         cur.set_tile(tile_x, tile_y, 0)
 
         elif event.type == SDL_MOUSEBUTTONDOWN:
             is_dragging = True
             dragging_button = event.button
-            mouse_x, mouse_y = event.x, 500 - event.y
+            mouse_x, mouse_y = event.x, canvas_height - 1 - event.y
             cur = get_current_tilemap()
             if cur:
                 tile_x = (mouse_x + camera_x) // grid_size
                 tile_y = (mouse_y + camera_y) // grid_size
+                depth = layer_depths[current_layer] + sub_layer_depth
+
                 if event.button == SDL_BUTTON_LEFT:
-                    cur.set_tile(tile_x, tile_y, selected_tile)
+                    set_tile_with_depth(cur, tile_x, tile_y, selected_tile, depth)
                 elif event.button == SDL_BUTTON_RIGHT:
-                    cur.set_tile(tile_x, tile_y, 0)  # 타일 지우기
+                    cur.set_tile(tile_x, tile_y, 0)
 
         elif event.type == SDL_MOUSEBUTTONUP:
             is_dragging = False
@@ -323,68 +400,93 @@ def update():
 def draw():
     clear_canvas()
 
-    # 그리드 그리기
-    screen_w = 1600
-    screen_h = 900
+    screen_w = get_canvas_width()
+    screen_h = get_canvas_height()
 
-    # 화면에 보이는 영역의 월드 좌표 계산
-    left = camera_x
-    right = camera_x + screen_w
-    bottom = camera_y
-    top = camera_y + screen_h
+    # 모든 레이어의 타일을 수집하여 깊이 기준으로 정렬
+    all_tiles = []
 
-    # 그리드 시작/끝 타일 인덱스 계산 (0 이상만)
-    start_x = max(0, int(left // grid_size))
-    end_x = int(right // grid_size) + 1
-    start_y = max(0, int(bottom // grid_size))
-    end_y = int(top // grid_size) + 1
-
-    # 1. 배경 레이어
+    # 1. 배경 레이어 타일 수집
     if tilemap_bg:
-        tilemap_bg.draw(camera_x, camera_y)
+        for y, row in enumerate(tilemap_bg.tiles):
+            for x, tile_id in enumerate(row):
+                if tile_id > 0:
+                    depth = tilemap_bg.get_tile_depth(x, y)
+                    all_tiles.append((depth, 'background', x, y, tile_id))
 
-    # 2. 장식 레이어
+    # 2. 장식 레이어 타일 수집
     if tilemap_decoration:
-        tilemap_decoration.draw(camera_x, camera_y)
+        for y, row in enumerate(tilemap_decoration.tiles):
+            for x, tile_id in enumerate(row):
+                if tile_id > 0:
+                    depth = tilemap_decoration.get_tile_depth(x, y)
+                    all_tiles.append((depth, 'decoration', x, y, tile_id))
 
-    # 3. 지형 레이어 (앞)
+    # 3. 지형 레이어 타일 수집
     if tilemap_terrain:
-        tilemap_terrain.draw(camera_x, camera_y)
+        for y, row in enumerate(tilemap_terrain.tiles):
+            for x, tile_id in enumerate(row):
+                if tile_id > 0:
+                    depth = tilemap_terrain.get_tile_depth(x, y)
+                    all_tiles.append((depth, 'terrain', x, y, tile_id))
 
-    # 그리드 선 그리기 (타일맵 위에 그려서 보이도록)
-    from pico2d import draw_rectangle
-    for x in range(start_x, end_x + 1):
-        wx = x * grid_size
-        sx = wx - camera_x
-        # 세로선
-        draw_rectangle(sx, 0, sx + 1, screen_h)
+    # 깊이 기준으로 정렬 (낮은 값이 먼저 = 뒤에 그려짐)
+    all_tiles.sort(key=lambda t: t[0])
 
-    for y in range(start_y, end_y + 1):
-        wy = y * grid_size
-        sy = wy - camera_y
-        # 가로선
-        draw_rectangle(0, sy, screen_w, sy + 1)
+    # 정렬된 순서대로 타일 그리기
+    for depth, layer_name, tile_x, tile_y, tile_id in all_tiles:
+        tilemap = get_tilemap_by_name(layer_name)
+        if tilemap and tile_id in tilemap.tile_images:
+            world_x = tile_x * grid_size + grid_size // 2
+            world_y = tile_y * grid_size + grid_size // 2
 
-    # 선택된 타일 미리보기 (현재 레이어 기준)
+            screen_x = world_x - camera_x
+            screen_y = world_y - camera_y
+
+            tilemap.tile_images[tile_id].draw(screen_x, screen_y)
+
+    # 선택된 타일 미리보기
     cur = get_current_tilemap()
     if cur and selected_tile in cur.tile_images:
-        cur.tile_images[selected_tile].draw(50, 470)
+        cur.tile_images[selected_tile].draw(50, screen_h - 30)
 
-    # 현재 마우스 위치의 타일 위치 표시 (그리드 스냅)
+    # 현재 서브레이어 깊이 표시
+    draw_text(f"Layer: {current_layer}", 10, screen_h - 60)
+    draw_text(f"Sub-depth: {sub_layer_depth}", 10, screen_h - 80)
+    draw_text(f"Total depth: {layer_depths[current_layer] + sub_layer_depth}", 10, screen_h - 100)
+
+    # 마우스 프리뷰
     tile_x = (mouse_x + camera_x) // grid_size
     tile_y = (mouse_y + camera_y) // grid_size
-    px = tile_x * grid_size - camera_x + grid_size // 2
-    py = tile_y * grid_size - camera_y + grid_size // 2
 
-    # 배치될 위치 프리뷰
+    world_px = tile_x * grid_size + grid_size // 2
+    world_py = tile_y * grid_size + grid_size // 2
+
+    screen_px = world_px - camera_x
+    screen_py = world_py - camera_y
+
     if cur and selected_tile in cur.tile_images:
         cur.tile_images[selected_tile].opacify(0.5)
-        cur.tile_images[selected_tile].draw(px, py)
+        cur.tile_images[selected_tile].draw(screen_px, screen_py)
         cur.tile_images[selected_tile].opacify(1.0)
-
 
     update_canvas()
 
+def get_tilemap_by_name(layer_name):
+    """레이어 이름으로 타일맵 객체 반환"""
+    if layer_name == 'background':
+        return tilemap_bg
+    elif layer_name == 'decoration':
+        return tilemap_decoration
+    elif layer_name == 'terrain':
+        return tilemap_terrain
+    return None
+
+
+def draw_text(text, x, y):
+    """간단한 텍스트 렌더링 (pico2d에서는 기본 지원 안 함, PIL 필요)"""
+    # 임시로 콘솔 출력으로 대체하거나, PIL/폰트 로드 필요
+    pass
 
 def pause():
     pass

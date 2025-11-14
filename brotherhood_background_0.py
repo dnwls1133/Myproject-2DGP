@@ -25,32 +25,43 @@ class BrotherhoodBackground0:
         screen_w = game_framework.camera_manager.screen_width
         screen_h = game_framework.camera_manager.screen_height
 
-        # 화면에 보이는 월드 영역
-        left = cam_x - screen_w // 2
-        right = cam_x + screen_w // 2
-        bottom = cam_y - screen_h // 2
-        top = cam_y + screen_h // 2
+        # 윈도우-뷰포트 배율 계산
+        viewport_scale_x = screen_w / game_framework.camera_manager.window_width
+        viewport_scale_y = screen_h / game_framework.camera_manager.window_height
 
-        # ✅ 확대된 크기로 타일 반복 범위 계산
-        start_x = int(left // self.scaled_width) * self.scaled_width
-        start_y = int(bottom // self.scaled_height) * self.scaled_height
+        # 배율 적용된 크기
+        scaled_width = int(self.img_width * self.scale * viewport_scale_x)
+        scaled_height = int(self.img_height * self.scale * viewport_scale_y)
+
+        # 화면에 보이는 월드 영역
+        window_half_w = game_framework.camera_manager.window_width / 2
+        window_half_h = game_framework.camera_manager.window_height / 2
+        left = cam_x - window_half_w
+        right = cam_x + window_half_w
+        bottom = cam_y - window_half_h
+        top = cam_y + window_half_h
+
+        # 타일 반복 범위 계산 (월드 좌표 기준)
+        tile_world_width = self.img_width * self.scale
+        tile_world_height = self.img_height * self.scale
+        start_x = int(left // tile_world_width) * tile_world_width
+        start_y = int(bottom // tile_world_height) * tile_world_height
 
         # 배경 타일 그리기
         x = start_x
-        while x < right + self.scaled_width:
+        while x < right + tile_world_width:
             y = start_y
-            while y < top + self.scaled_height:
-                # 타일 중심 좌표
-                tile_center_x = x + self.scaled_width // 2
-                tile_center_y = y + self.scaled_height // 2
+            while y < top + tile_world_height:
+                # 타일 중심 좌표 (월드)
+                tile_center_x = x + tile_world_width / 2
+                tile_center_y = y + tile_world_height / 2
 
                 screen_x, screen_y = game_framework.camera_manager.world_to_screen(
                     tile_center_x, tile_center_y
                 )
 
-                # ✅ 확대된 크기로 그리기
-                self.image.draw(screen_x, screen_y, self.scaled_width, self.scaled_height)
+                # 윈도우-뷰포트 배율이 적용된 크기로 그리기
+                self.image.draw(screen_x, screen_y, scaled_width, scaled_height)
 
-                y += self.scaled_height
-            x += self.scaled_width
-
+                y += tile_world_height
+            x += tile_world_width
