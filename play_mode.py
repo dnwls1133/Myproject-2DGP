@@ -26,7 +26,7 @@ def handle_events():
 
 def init():
     global anim_manager
-    game_framework.camera_manager.set_zoom(3.0)  # 원본 크기
+    game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
     anim_manager = AnimationManager()
@@ -40,26 +40,31 @@ def init():
         print(f"애니메이션 등록 실패: {e}")
 
 
-    # 타일맵 로드
+    # 타일맵 로드 (레이어 0: 배경)
     tilemap_bg = TileMap()
     tilemap_bg.load_tile_images(bg_tiles)
     tilemap_bg.load_from_file('start_map_bg.json')
-    game_world.add_object(tilemap_bg,1)
+    game_world.add_object(tilemap_bg, 0)
+    print(f"배경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_bg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_bg.free_tiles)}개)")
 
+    # 타일맵 로드 (레이어 1: 지형)
     tilemap_terrain = TileMap()
     tilemap_terrain.load_tile_images(terrain_tiles)
     tilemap_terrain.load_from_file('start_map.json')
-    game_world.add_object(tilemap_terrain, 2)
+    game_world.add_object(tilemap_terrain, 1)
+    print(f"지형 타일맵 로드 완료 (그리드: {len([t for row in tilemap_terrain.tiles for t in row if t > 0])}개, 자유: {len(tilemap_terrain.free_tiles)}개)")
 
+    # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
+    penintent = Penintent(anim_manager)
+    game_world.add_object(penintent, 2)
+    print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
+
+    # 타일맵 로드 (레이어 3: 장식 - 플레이어 위에 그려질 수 있음)
     tilemap_deco = TileMap()
     tilemap_deco.load_tile_images(decoration_tiles)
     tilemap_deco.load_from_file('start_map_decoration.json')
     game_world.add_object(tilemap_deco, 3)
-
-
-    penintent = Penintent(anim_manager)  # anim_manager 인자 추가
-    game_world.add_object(penintent,4)
-
+    print(f"장식 타일맵 로드 완료 (그리드: {len([t for row in tilemap_deco.tiles for t in row if t > 0])}개, 자유: {len(tilemap_deco.free_tiles)}개)")
 
 
 def update():
