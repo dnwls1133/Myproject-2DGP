@@ -26,10 +26,10 @@ def clear_collision_pairs():
 
 def check_collisions(group):
     """ 특정 그룹의 충돌 체크"""
-    if group in collision_pairs:
+    if group not in collision_pairs:
         return
 
-    a_list, b_list =  collision_pairs[group]
+    a_list, b_list = collision_pairs[group]
 
     for a in a_list:
         if not hasattr(a, 'collider') or not a.collider.active:
@@ -41,9 +41,9 @@ def check_collisions(group):
 
             if a.collider.collides_with(b.collider):
                 if hasattr(a, 'on_collision'):
-                    a.on_collision(group,b)
+                    a.on_collision(group, b)
                 if hasattr(b, 'on_collision'):
-                    b.on_collision(group,a)
+                    b.on_collision(group, a)
 
 
 def check_all_collisions():

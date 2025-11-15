@@ -1,7 +1,10 @@
 from pico2d import *
 import game_framework
 from tilemap import TileMap
+from floor_object import FloorManager, FloorObject
 import ctypes
+import json
+import os  # 추가: 파일 경로 처리를 위한 os 모듈
 
 # SDL 마우스 상태 함수 가져오기
 SDL_GetMouseState = ctypes.CDLL('SDL2.dll').SDL_GetMouseState
@@ -12,6 +15,7 @@ SDL_GetMouseState.restype = ctypes.c_uint32
 tilemap_bg = None
 tilemap_decoration = None
 tilemap_terrain = None
+floor_manager = None  # 바닥 매니저 추가
 
 camera_x, camera_y = 0, 0
 selected_tile = 1
@@ -29,6 +33,12 @@ tile_scale = 1.0  # 타일 크기 배율
 tile_rotation = 0  # 타일 회전 각도 (도)
 tile_flip_x = False # X축 반전
 tile_flip_y = False # Y축 반전
+
+# 바닥 배치 모드 관련 변수
+floor_placement_mode = False  # 바닥 배치 모드
+floor_drag_start = None  # 바닥 드래그 시작점 (world x, y)
+floor_current_rect = None  # 현재 그리고 있는 바닥 임시 사각형
+selected_floor = None  # 선택된 바닥 객체
 
 
 # Undo/Redo 시스템
@@ -61,54 +71,54 @@ bg_tiles = {
 }
 
 decoration_tiles = {
-    1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_0.png', 'solid': True},
-    2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': True},
-    3: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_2.png', 'solid': True},
-    4: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_3.png', 'solid': True},
-    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': True},
-    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': True},
-    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': True},
-    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': True},
-    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': True},
-    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid': True},
-    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': True},
-    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': True},
-    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': True},
-    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': True},
-    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': True},
-    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': True},
-    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': True},
-    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': True},
-    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': True},
+    1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_0.png', 'solid': False},
+    2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': False},
+    3: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_2.png', 'solid': False},
+    4: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_3.png', 'solid': False},
+    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': False},
+    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': False},
+    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': False},
+    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': False},
+    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': False},
+    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid':  False},
+    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': False},
+    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': False},
+    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': False},
+    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': False},
+    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': False},
+    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': False},
+    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': False},
+    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': False},
+    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': False},
     20: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_27.png', 'solid': False},
-    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': True},
-    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': True},
-    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': True},
-    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': True},
-    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': True},
-    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': True},
-    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': True},
-    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': True},
-    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': True},
-    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': True},
-    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': True},
-    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': True},
-    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': True},
-    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': True},
-    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': True},
-    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': True},
-    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': True},
-    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': True},
-    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': True},
-    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': True},
-    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': True},
-    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': True},
-    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': True},
-    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': True},
-    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': True},
-    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': True},
-    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': True},
-    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': True}
+    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': False},
+    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': False},
+    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': False},
+    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': False},
+    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': False},
+    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': False},
+    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': False},
+    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': False},
+    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': False},
+    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': False},
+    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': False},
+    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': False},
+    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': False},
+    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': False},
+    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': False},
+    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': False},
+    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': False},
+    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': False},
+    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': False},
+    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': False},
+    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': False},
+    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': False},
+    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': False},
+    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': False},
+    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': False},
+    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': False},
+    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': False},
+    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': False}
 }
 
 # terrain_tiles 수동 할당 (실제 존재하는 파일들)
@@ -117,50 +127,50 @@ terrain_tiles = {
     2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': True},
     3: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_2.png', 'solid': True},
     4: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_3.png', 'solid': True},
-    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': True},
-    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': True},
-    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': True},
-    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': True},
-    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': True},
-    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid': True},
-    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': True},
-    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': True},
-    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': True},
-    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': True},
-    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': True},
-    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': True},
-    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': True},
-    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': True},
-    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': True},
-    20: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_27.png', 'solid': True},
-    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': True},
-    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': True},
-    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': True},
-    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': True},
-    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': True},
-    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': True},
-    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': True},
-    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': True},
-    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': True},
-    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': True},
-    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': True},
-    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': True},
-    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': True},
-    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': True},
-    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': True},
-    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': True},
-    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': True},
-    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': True},
-    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': True},
-    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': True},
-    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': True},
-    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': True},
-    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': True},
-    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': True},
-    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': True},
-    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': True},
-    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': True},
-    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': True}
+    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': False},
+    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': False},
+    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': False},
+    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': False},
+    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': False},
+    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid': False},
+    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': False},
+    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': False},
+    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': False},
+    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': False},
+    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': False},
+    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': False},
+    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': False},
+    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': False},
+    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': False},
+    20: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_27.png', 'solid': False},
+    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': False},
+    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': False},
+    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': False},
+    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': False},
+    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': False},
+    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': False},
+    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': False},
+    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': False},
+    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': False},
+    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': False},
+    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': False},
+    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': False},
+    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': False},
+    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': False},
+    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': False},
+    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': False},
+    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': False},
+    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': False},
+    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': False},
+    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': False},
+    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': False},
+    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': False},
+    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': False},
+    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': False},
+    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': False},
+    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': False},
+    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': False},
+    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': False}
 }
 
 print(f"로드된 terrain 타일 개수: {len(terrain_tiles)}")
@@ -185,7 +195,7 @@ def get_current_tilemap():
 
 
 def init():
-    global tilemap_bg, tilemap_decoration, tilemap_terrain
+    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
 
     # 배경 레이어 (주로 큰 배경 이미지 여러장)
     tilemap_bg = TileMap(grid_size, grid_size)
@@ -199,7 +209,8 @@ def init():
     tilemap_terrain = TileMap(grid_size, grid_size)
     tilemap_terrain.create_empty_map(50, 30)
 
-
+    # 바닥 매니저 초기화
+    floor_manager = FloorManager()
 
     tilemap_bg.load_tile_images(bg_tiles)
     tilemap_decoration.load_tile_images(decoration_tiles)
@@ -208,25 +219,43 @@ def init():
     game_framework.camera_manager.set_zoom(1.0)
 
 def finish():
-    global tilemap_bg, tilemap_decoration, tilemap_terrain
+    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
     tilemap_bg = None
     tilemap_decoration = None
     tilemap_terrain = None
-
+    floor_manager = None  # 바닥 매니저 해제
 
 def save_all():
     # 레이어별로 파일 분리 저장
     global tilemap_bg, tilemap_decoration, tilemap_terrain
+
+    # 현재 맵 파일 이름 가져오기 (terrain 레이어 기준)
+    base_filename = 'map'  # 기본값
+    if tilemap_terrain and tilemap_terrain.current_file:
+        # 파일 경로에서 파일 이름만 추출 (확장자 제거)
+        base_filename = os.path.splitext(os.path.basename(tilemap_terrain.current_file))[0]
+        # 'map_terrain' 같은 형식에서 'map' 부분만 추출
+        if '_' in base_filename:
+            base_filename = base_filename.rsplit('_', 1)[0]
+
     if tilemap_bg:
-        tilemap_bg.save_to_file('map_bg.json')
+        tilemap_bg.save_to_file(f'{base_filename}_bg.json')
     if tilemap_decoration:
-        tilemap_decoration.save_to_file('map_decoration.json')
+        tilemap_decoration.save_to_file(f'{base_filename}_decoration.json')
     if tilemap_terrain:
-        tilemap_terrain.save_to_file('map_terrain.json')
-    print('모든 레이어 저장 완료')
+        tilemap_terrain.save_to_file(f'{base_filename}_terrain.json')
+
+    # 바닥 정보 저장 (맵 이름과 연동)
+    if floor_manager:
+        floor_filename = f'{base_filename}_floor.json'
+        floor_manager.save_to_file(floor_filename)
+
+    print(f'모든 레이어 및 바닥 정보 저장 완료 (기본 이름: {base_filename})')
 
 
 def load_all():
+    global floor_manager
+
     try:
         if tilemap_bg:
             tilemap_bg.load_from_file('map_bg.json')
@@ -242,6 +271,22 @@ def load_all():
             tilemap_terrain.load_from_file('map_terrain.json')
     except Exception:
         pass
+
+    # 바닥 정보 로드 (terrain 맵 파일 이름 기준)
+    base_filename = 'map'  # 기본값
+    if tilemap_terrain and tilemap_terrain.current_file:
+        base_filename = os.path.splitext(os.path.basename(tilemap_terrain.current_file))[0]
+        if '_' in base_filename:
+            base_filename = base_filename.rsplit('_', 1)[0]
+
+    floor_filename = f'{base_filename}_floor.json'
+    try:
+        floor_manager = FloorManager.load_from_file(floor_filename)
+        print(f'바닥 정보 로드: {floor_filename}')
+    except Exception as e:
+        floor_manager = FloorManager()  # 기본값으로 초기화
+        print(f'바닥 파일 없음 또는 로드 실패: {floor_filename}')
+
     print('가능한 레이어 로드 완료')
 
 
@@ -359,6 +404,7 @@ def restore_state(state):
 def handle_events():
     global selected_tile, mouse_x, mouse_y, camera_x, camera_y, is_dragging, current_layer, dragging_button, sub_layer_depth
     global free_placement_mode, tile_scale, tile_rotation, tile_flip_x, tile_flip_y
+    global floor_placement_mode, floor_drag_start, floor_current_rect, selected_floor
 
 
     # 캔버스 크기 가져오기
@@ -394,14 +440,16 @@ def handle_events():
 
             # Ctrl+S: 저장 / Ctrl+Shift+S: 다른 이름으로 저장
             if event.key == SDLK_s and ctrl_held:
-                cur = get_current_tilemap()
-                if cur:
-                    if shift_held:
+                if shift_held:
+                    # Ctrl+Shift+S: 현재 레이어만 다른 이름으로 저장
+                    cur = get_current_tilemap()
+                    if cur:
                         if cur.save_map_as():
                             print(f"{current_layer} 레이어 다른 이름으로 저장 완료")
-                    else:
-                        if cur.save_map():
-                            print(f"{current_layer} 레이어 저장 완료")
+                else:
+                    # Ctrl+S: 모든 레이어 + 바닥 정보 한 번에 저장
+                    save_all()
+                    print("모든 레이어 및 바닥 정보 저장 완료")
 
             # Ctrl+O: 불러오기
             elif event.key == SDLK_o and ctrl_held:
@@ -493,10 +541,45 @@ def handle_events():
                 tile_flip_y = not tile_flip_y
                 print(f"타일 세로 뒤집기: {'ON' if tile_flip_y else 'OFF'}")
 
+            # B 키: 바닥 배치 모드 전환
+            elif event.key == SDLK_b:
+                floor_placement_mode = not floor_placement_mode
+                if floor_placement_mode:
+                    free_placement_mode = False  # 타일 배치 모드 비활성화
+                    selected_floor = None  # 선택 초기화
+                print(f"바닥 배치 모드: {'ON' if floor_placement_mode else 'OFF'}")
+
+            # G 키: 선택된 바닥 회전 (반시계방향, 5도씩)
+            elif event.key == SDLK_g and floor_placement_mode and selected_floor:
+                selected_floor.slope_angle = max(-45, selected_floor.slope_angle - 5)
+                print(f"바닥 회전: {selected_floor.slope_angle}도")
+
+            # H 키: 선택된 바닥 회전 (시계방향, 5도씩)
+            elif event.key == SDLK_h and floor_placement_mode and selected_floor:
+                selected_floor.slope_angle = min(45, selected_floor.slope_angle + 5)
+                print(f"바닥 회전: {selected_floor.slope_angle}도")
+
+            # R 키: 선택된 바닥 회전 초기화
+            elif event.key == SDLK_r and floor_placement_mode and selected_floor:
+                selected_floor.slope_angle = 0
+                print(f"바닥 회전 초기화: 0도")
+
+
         elif event.type == SDL_MOUSEMOTION:
             mouse_x, mouse_y = event.x, canvas_height - 1 - event.y
 
-            if is_dragging and dragging_button is not None:
+            # 바닥 배치 모드: 드래그 중 임시 사각형 업데이트
+            if floor_placement_mode and floor_drag_start:
+                world_x = mouse_x + camera_x
+                world_y = mouse_y + camera_y
+                floor_current_rect = (
+                    min(floor_drag_start[0], world_x),
+                    min(floor_drag_start[1], world_y),
+                    max(floor_drag_start[0], world_x),
+                    max(floor_drag_start[1], world_y)
+                )
+
+            elif is_dragging and dragging_button is not None:
                 cur = get_current_tilemap()
                 if cur:
                     depth = layer_depths[current_layer] + sub_layer_depth
@@ -521,6 +604,54 @@ def handle_events():
                             cur.set_tile(tile_x, tile_y, 0)
 
         elif event.type == SDL_MOUSEBUTTONDOWN:
+            mouse_x, mouse_y = event.x, canvas_height - 1 - event.y
+
+            # 바닥 배치 모드
+            if floor_placement_mode:
+                world_x = mouse_x + camera_x
+                world_y = mouse_y + camera_y
+
+                if event.button == SDL_BUTTON_LEFT:
+                    # 먼저 기존 바닥을 클릭했는지 확인 (선택 모드)
+                    clicked_floor = None
+                    if floor_manager:
+                        for floor in floor_manager.floors:
+                            left = floor.x - floor.collider.width / 2
+                            right = floor.x + floor.collider.width / 2
+                            bottom = floor.y - floor.collider.height / 2
+                            top = floor.y + floor.collider.height / 2
+
+                            if left <= world_x <= right and bottom <= world_y <= top:
+                                clicked_floor = floor
+                                break
+
+                    if clicked_floor:
+                        # 기존 바닥 선택
+                        selected_floor = clicked_floor
+                        print(f"바닥 선택: 위치({selected_floor.x:.0f}, {selected_floor.y:.0f}), 각도={selected_floor.slope_angle}도")
+                    else:
+                        # 새 바닥 그리기 시작
+                        selected_floor = None
+                        floor_drag_start = (world_x, world_y)
+                        floor_current_rect = (world_x, world_y, world_x, world_y)
+
+                elif event.button == SDL_BUTTON_RIGHT:
+                    # 바닥 삭제: 클릭 위치에 있는 바닥 찾아서 제거
+                    if floor_manager:
+                        for floor in floor_manager.floors[:]:
+                            left = floor.x - floor.collider.width / 2
+                            right = floor.x + floor.collider.width / 2
+                            bottom = floor.y - floor.collider.height / 2
+                            top = floor.y + floor.collider.height / 2
+
+                            if left <= world_x <= right and bottom <= world_y <= top:
+                                if floor == selected_floor:
+                                    selected_floor = None
+                                floor_manager.remove_floor(floor)
+                                print(f"바닥 삭제: ({floor.x:.0f}, {floor.y:.0f})")
+                                break
+                return
+
             # 마우스 버튼을 누르기 전에 현재 상태 저장 (Undo용)
             save_state_to_undo()
 
@@ -551,6 +682,26 @@ def handle_events():
                         cur.set_tile(tile_x, tile_y, 0)
 
         elif event.type == SDL_MOUSEBUTTONUP:
+            # 바닥 배치 모드: 드래그 완료 시 바닥 생성
+            if floor_placement_mode and floor_drag_start and event.button == SDL_BUTTON_LEFT:
+                if floor_current_rect:
+                    left, bottom, right, top = floor_current_rect
+                    center_x = (left + right) / 2
+                    center_y = (bottom + top) / 2
+                    width = right - left
+                    height = top - bottom
+
+                    # 최소 크기 체크 (너무 작은 바닥은 생성하지 않음)
+                    if width > 10 and height > 10:
+                        # 바닥 생성 (기본 각도 0도로 생성)
+                        floor = FloorObject(center_x, center_y, width, height, 'ground', slope_angle=0)
+                        floor_manager.add_floor(floor)
+                        print(f"바닥 생성: 위치({center_x:.0f}, {center_y:.0f}), 크기({width:.0f}x{height:.0f})")
+
+                floor_drag_start = None
+                floor_current_rect = None
+                return
+
             is_dragging = False
             dragging_button = None
 
@@ -710,8 +861,16 @@ def draw():
     draw_text(f"Scale: {tile_scale}x", 10, screen_h - 140)
     draw_text(f"Rotation: {tile_rotation}°", 10, screen_h - 160)
 
+    # 바닥 배치 모드 정보 표시
+    if floor_placement_mode:
+        draw_text(f"Floor Mode: ON", 10, screen_h - 180)
+        if selected_floor:
+            draw_text(f"Selected Floor: Angle={selected_floor.slope_angle}° (G/H: rotate)", 10, screen_h - 200)
+        else:
+            draw_text(f"Click to select floor or drag to create new", 10, screen_h - 200)
+
     # 마우스 프리뷰 (변형 적용)
-    if cur and selected_tile in cur.tile_images:
+    if cur and selected_tile in cur.tile_images and not floor_placement_mode:
         if free_placement_mode:
             # 자유 배치: 마우스 위치 그대로
             preview_x = mouse_x
@@ -743,6 +902,20 @@ def draw():
             int(img.h * tile_scale)
         )
         img.opacify(1.0)
+
+    # 바닥 배치 모드일 때 임시 사각형 그리기
+    if floor_placement_mode and floor_current_rect:
+        left, bottom, right, top = floor_current_rect
+        draw_rectangle(
+            left - camera_x,
+            bottom - camera_y,
+            right - camera_x,
+            top - camera_y
+        )
+
+    # 모든 바닥 디버그 시각화 (초록색=충돌 없음, 빨간색=충돌 중)
+    if floor_manager:
+        floor_manager.draw_debug(camera_x=camera_x, camera_y=camera_y)  # 카메라 오프셋 전달
 
     update_canvas()
 

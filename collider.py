@@ -10,6 +10,7 @@ class Collider:
         self.width = width # 충돌체의 너비
         self.height = height # 충돌체의 높이
         self.active = True # 충돌체 활성화 여부
+        self.is_colliding = False  # 현재 충돌 중인지 여부
 
     def set_offset(self, offset_x, offset_y):
         """충돌체 오프셋 설정"""
@@ -65,8 +66,12 @@ class Collider:
 
         return True
 
-    def draw_debug(self):
-        """디버그용으로 바운딩 박스 그리기"""
+    def draw_debug(self, is_colliding=False):
+        """디버그용으로 바운딩 박스 그리기
+
+        Args:
+            is_colliding: 충돌 중이면 True (빨간색), 아니면 False (초록색)
+        """
         if not self.active:
             return
 
@@ -74,11 +79,18 @@ class Collider:
         if bb is None:
             return
 
-        """디버그용 충돌 박스 그리기"""
         left, bottom, right, top = bb
 
         # 월드 좌표를 스크린 좌표로 변환
         screen_left, screen_bottom = game_framework.camera_manager.world_to_screen(left, bottom)
         screen_right, screen_top = game_framework.camera_manager.world_to_screen(right, top)
 
-        draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)
+        # 충돌 상태에 따라 색상 변경
+        if is_colliding:
+            # 빨간색 (충돌 중)
+            draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)
+        else:
+            # 초록색 (충돌 없음) - pico2d는 색상 설정이 제한적이므로 여러 번 그려서 표현
+            # 실제로는 OpenGL 색상을 직접 설정해야 하지만, 간단하게 선 두께로 구분
+            for i in range(3):
+                draw_rectangle(screen_left - i, screen_bottom - i, screen_right + i, screen_top + i)
