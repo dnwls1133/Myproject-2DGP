@@ -31,7 +31,20 @@ bg_tiles = {
     4: {'path': 'sprites/map/Texture2D/Background/brotherhood-background-beginning_3.png', 'solid': False},
     5: {'path': 'sprites/map/Texture2D/Background/brotherhood-background-beginning_4.png', 'solid': False},
     6: {'path': 'sprites/map/Texture2D/Background/brotherhood-background-beginning_5.png', 'solid': False},
-    7: {'path': 'sprites/map/Texture2D/Background/brotherhood-background-beginning_6.png', 'solid': False}
+    7: {'path': 'sprites/map/Texture2D/Background/brotherhood-background-beginning_6.png', 'solid': False},
+    8: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_0.png', 'solid': False},
+    9: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_1.png', 'solid': False},
+    10: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_2.png', 'solid': False},
+    11: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_3.png', 'solid': False},
+    12: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_4.png', 'solid': False},
+    13: {'path': 'sprites/map/Texture2D/Background/Sprite/background_boss_background_5.png', 'solid': False},
+    14: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_0.png', 'solid': False},
+    15: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_1.png', 'solid': False},
+    16: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_2.png', 'solid': False},
+    17: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_3.png', 'solid': False},
+    18: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_4.png', 'solid': False},
+    19: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start_background_5.png', 'solid': False}
+
 }
 
 decoration_tiles = {
