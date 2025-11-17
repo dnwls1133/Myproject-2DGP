@@ -5,6 +5,8 @@ from floor_object import FloorManager, FloorObject
 import ctypes
 import json
 import os  # 추가: 파일 경로 처리를 위한 os 모듈
+import tkinter as tk
+from tkinter import simpledialog
 
 # SDL 마우스 상태 함수 가져오기
 SDL_GetMouseState = ctypes.CDLL('SDL2.dll').SDL_GetMouseState
@@ -253,6 +255,57 @@ def save_all():
     print(f'모든 레이어 및 바닥 정보 저장 완료 (기본 이름: {base_filename})')
 
 
+def save_all_as():
+    """모든 레이어와 바닥 정보를 다른 이름으로 저장"""
+    global tilemap_bg, tilemap_decoration, tilemap_terrain
+
+    # tkinter 창 숨기기 (다이얼로그만 표시)
+    root = tk.Tk()
+    root.withdraw()
+
+    # 현재 파일 이름 가져오기 (기본값 제시용)
+    default_name = 'map'
+    if tilemap_terrain and tilemap_terrain.current_file:
+        base = os.path.splitext(os.path.basename(tilemap_terrain.current_file))[0]
+        if '_' in base:
+            default_name = base.rsplit('_', 1)[0]
+
+    # 사용자에게 파일 이름 입력받기
+    new_name = simpledialog.askstring(
+        "다른 이름으로 저장",
+        "맵 파일 이름을 입력하세요 (확장자 제외):",
+        initialvalue=default_name
+    )
+
+    root.destroy()
+
+    if not new_name:
+        print("저장이 취소되었습니다.")
+        return False
+
+    # 공백 제거 및 유효성 검사
+    new_name = new_name.strip()
+    if not new_name:
+        print("유효하지 않은 파일 이름입니다.")
+        return False
+
+    # 각 레이어 저장
+    if tilemap_bg:
+        tilemap_bg.save_to_file(f'{new_name}_bg.json')
+    if tilemap_decoration:
+        tilemap_decoration.save_to_file(f'{new_name}_decoration.json')
+    if tilemap_terrain:
+        tilemap_terrain.save_to_file(f'{new_name}_terrain.json')
+
+    # 바닥 정보 저장
+    if floor_manager:
+        floor_filename = f'{new_name}_floor.json'
+        floor_manager.save_to_file(floor_filename)
+
+    print(f'모든 레이어 및 바닥 정보를 "{new_name}"(으)로 저장 완료')
+    return True
+
+
 def load_all():
     global floor_manager
 
@@ -288,6 +341,78 @@ def load_all():
         print(f'바닥 파일 없음 또는 로드 실패: {floor_filename}')
 
     print('가능한 레이어 로드 완료')
+
+
+def load_all_with_dialog():
+    """다이얼로그로 파일 이름을 입력받아 모든 레이어와 바닥 정보를 불러오기"""
+    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
+
+    # tkinter 창 숨기기 (다이얼로그만 표시)
+    root = tk.Tk()
+    root.withdraw()
+
+    # 사용자에게 파일 이름 입력받기
+    map_name = simpledialog.askstring(
+        "맵 불러오기",
+        "불러올 맵 파일 이름을 입력하세요 (확장자 제외):",
+        initialvalue='map'
+    )
+
+    root.destroy()
+
+    if not map_name:
+        print("불러오기가 취소되었습니다.")
+        return False
+
+    # 공백 제거 및 유효성 검사
+    map_name = map_name.strip()
+    if not map_name:
+        print("유효하지 않은 파일 이름입니다.")
+        return False
+
+    # 각 레이어 불러오기
+    success_count = 0
+
+    try:
+        if tilemap_bg:
+            tilemap_bg.load_from_file(f'{map_name}_bg.json')
+            success_count += 1
+            print(f'배경 레이어 로드: {map_name}_bg.json')
+    except Exception as e:
+        print(f'배경 레이어 로드 실패: {e}')
+
+    try:
+        if tilemap_decoration:
+            tilemap_decoration.load_from_file(f'{map_name}_decoration.json')
+            success_count += 1
+            print(f'장식 레이어 로드: {map_name}_decoration.json')
+    except Exception as e:
+        print(f'장식 레이어 로드 실패: {e}')
+
+    try:
+        if tilemap_terrain:
+            tilemap_terrain.load_from_file(f'{map_name}_terrain.json')
+            success_count += 1
+            print(f'지형 레이어 로드: {map_name}_terrain.json')
+    except Exception as e:
+        print(f'지형 레이어 로드 실패: {e}')
+
+    # 바닥 정보 로드
+    floor_filename = f'{map_name}_floor.json'
+    try:
+        floor_manager = FloorManager.load_from_file(floor_filename)
+        success_count += 1
+        print(f'바닥 정보 로드: {floor_filename}')
+    except Exception as e:
+        floor_manager = FloorManager()  # 기본값으로 초기화
+        print(f'바닥 파일 로드 실패: {e}')
+
+    if success_count > 0:
+        print(f'맵 "{map_name}" 불러오기 완료 ({success_count}개 파일 로드)')
+        return True
+    else:
+        print(f'맵 "{map_name}" 불러오기 실패')
+        return False
 
 
 def set_tile_with_depth(tilemap,tile_x,tile_y,tile_id,depth):
@@ -441,21 +566,23 @@ def handle_events():
             # Ctrl+S: 저장 / Ctrl+Shift+S: 다른 이름으로 저장
             if event.key == SDLK_s and ctrl_held:
                 if shift_held:
-                    # Ctrl+Shift+S: 현재 레이어만 다른 이름으로 저장
-                    cur = get_current_tilemap()
-                    if cur:
-                        if cur.save_map_as():
-                            print(f"{current_layer} 레이어 다른 이름으로 저장 완료")
+                    # Ctrl+Shift+S: 모든 레이어 및 바닥 정보를 다른 이름으로 저장
+                    save_all_as()
                 else:
                     # Ctrl+S: 모든 레이어 + 바닥 정보 한 번에 저장
                     save_all()
                     print("모든 레이어 및 바닥 정보 저장 완료")
 
-            # Ctrl+O: 불러오기
+            # Ctrl+O: 불러오기 / Ctrl+Shift+O: 모든 레이어 + 바닥 정보 불러오기
             elif event.key == SDLK_o and ctrl_held:
-                cur = get_current_tilemap()
-                if cur and cur.load_map():
-                    print(f"{current_layer} 레이어 불러오기 완료")
+                if shift_held:
+                    # Ctrl+Shift+O: 모든 레이어 + 바닥 정보 불러오기
+                    load_all_with_dialog()
+                else:
+                    # Ctrl+O: 현재 레이어만 불러오기
+                    cur = get_current_tilemap()
+                    if cur and cur.load_map():
+                        print(f"{current_layer} 레이어 불러오기 완료")
 
             # Ctrl+N: 새 맵
             elif event.key == SDLK_n and ctrl_held:
@@ -525,13 +652,18 @@ def handle_events():
                 tile_rotation = (tile_rotation + 15) % 360
                 print(f"타일 회전: {tile_rotation}도")
 
-            # R 키: 타일 변형 초기화
-            elif event.key == SDLK_r:
+            # R 키: 타일 변형 초기화 (바닥 모드가 아닐 때만)
+            elif event.key == SDLK_r and not floor_placement_mode:
                 tile_scale = 1.0
                 tile_rotation = 0
                 tile_flip_x = False
                 tile_flip_y = False
                 print("타일 변형 초기화")
+
+            # R 키: 선택된 바닥 회전 초기화 (바닥 배치 모드일 때)
+            elif event.key == SDLK_r and floor_placement_mode and selected_floor:
+                selected_floor.rotation = 0
+                print(f"바닥 회전 초기화: 0도")
 
             elif event.key == SDLK_x:
                 tile_flip_x = not tile_flip_x
@@ -551,18 +683,41 @@ def handle_events():
 
             # G 키: 선택된 바닥 회전 (반시계방향, 5도씩)
             elif event.key == SDLK_g and floor_placement_mode and selected_floor:
-                selected_floor.slope_angle = max(-45, selected_floor.slope_angle - 5)
-                print(f"바닥 회전: {selected_floor.slope_angle}도")
+                selected_floor.rotation = (selected_floor.rotation + 5) % 360
+                print(f"바닥 회전: {selected_floor.rotation}도")
 
             # H 키: 선택된 바닥 회전 (시계방향, 5도씩)
             elif event.key == SDLK_h and floor_placement_mode and selected_floor:
-                selected_floor.slope_angle = min(45, selected_floor.slope_angle + 5)
-                print(f"바닥 회전: {selected_floor.slope_angle}도")
+                selected_floor.rotation = (selected_floor.rotation - 5) % 360
+                print(f"바닥 회전: {selected_floor.rotation}도")
 
-            # R 키: 선택된 바닥 회전 초기화
-            elif event.key == SDLK_r and floor_placement_mode and selected_floor:
-                selected_floor.slope_angle = 0
-                print(f"바닥 회전 초기화: 0도")
+            # IJKL 키: 선택된 바닥 이동 (바닥 배치 모드에서만)
+            # I=위, K=아래, J=왼쪽, L=오른쪽
+            elif event.key == SDLK_i and floor_placement_mode and selected_floor:
+                move_amount = 10 if not shift_held else 1  # Shift 누르면 1픽셀씩, 아니면 10픽셀씩
+                selected_floor.y += move_amount
+                print(f"바닥 이동: ({selected_floor.x:.0f}, {selected_floor.y:.0f})")
+
+            elif event.key == SDLK_k and floor_placement_mode and selected_floor:
+                move_amount = 10 if not shift_held else 1
+                selected_floor.y -= move_amount
+                print(f"바닥 이동: ({selected_floor.x:.0f}, {selected_floor.y:.0f})")
+
+            elif event.key == SDLK_j and floor_placement_mode and selected_floor:
+                move_amount = 10 if not shift_held else 1
+                selected_floor.x -= move_amount
+                print(f"바닥 이동: ({selected_floor.x:.0f}, {selected_floor.y:.0f})")
+
+            # L 키: Ctrl+L은 레이어 초기화, 바닥 모드에서는 오른쪽 이동
+            elif event.key == SDLK_l:
+                if ctrl_held and shift_held:
+                    clear_all_layers()
+                elif ctrl_held:
+                    clear_current_layer()
+                elif floor_placement_mode and selected_floor:
+                    move_amount = 10 if not shift_held else 1
+                    selected_floor.x += move_amount
+                    print(f"바닥 이동: ({selected_floor.x:.0f}, {selected_floor.y:.0f})")
 
 
         elif event.type == SDL_MOUSEMOTION:
@@ -628,7 +783,7 @@ def handle_events():
                     if clicked_floor:
                         # 기존 바닥 선택
                         selected_floor = clicked_floor
-                        print(f"바닥 선택: 위치({selected_floor.x:.0f}, {selected_floor.y:.0f}), 각도={selected_floor.slope_angle}도")
+                        print(f"바닥 선택: 위치({selected_floor.x:.0f}, {selected_floor.y:.0f}), 각도={selected_floor.rotation}도")
                     else:
                         # 새 바닥 그리기 시작
                         selected_floor = None
@@ -694,7 +849,7 @@ def handle_events():
                     # 최소 크기 체크 (너무 작은 바닥은 생성하지 않음)
                     if width > 10 and height > 10:
                         # 바닥 생성 (기본 각도 0도로 생성)
-                        floor = FloorObject(center_x, center_y, width, height, 'ground', slope_angle=0)
+                        floor = FloorObject(center_x, center_y, width, height, 'ground', rotation=0)
                         floor_manager.add_floor(floor)
                         print(f"바닥 생성: 위치({center_x:.0f}, {center_y:.0f}), 크기({width:.0f}x{height:.0f})")
 
@@ -865,7 +1020,7 @@ def draw():
     if floor_placement_mode:
         draw_text(f"Floor Mode: ON", 10, screen_h - 180)
         if selected_floor:
-            draw_text(f"Selected Floor: Angle={selected_floor.slope_angle}° (G/H: rotate)", 10, screen_h - 200)
+            draw_text(f"Selected Floor: Angle={selected_floor.rotation}° (G/H: rotate)", 10, screen_h - 200)
         else:
             draw_text(f"Click to select floor or drag to create new", 10, screen_h - 200)
 
@@ -934,6 +1089,7 @@ def draw_text(text, x, y):
     """간단한 텍스트 렌더링 (pico2d에서는 기본 지원 안 함, PIL 필요)"""
     # 임시로 콘솔 출력으로 대체하거나, PIL/폰트 로드 필요
     pass
+
 
 def pause():
     pass

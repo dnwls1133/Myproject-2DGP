@@ -2,98 +2,124 @@
 가상 바닥 객체
 - 충돌체만 가지고 있으며 렌더링은 하지 않음
 - Collider Manager를 통해 캐릭터와 충돌 체크
+- 회전 행렬을 사용한 OBB(Oriented Bounding Box) 충돌 지원
 """
 from collider import Collider
 from pico2d import *
 import game_framework
 import math
+import json
 
 
 class FloorObject:
-    """가상 바닥 충돌 객체"""
+    """가상 바닥 충돌 객체 (회전 가능한 사각형)"""
 
-    def __init__(self, x, y, width, height, floor_type='ground', slope_angle=0):
+    def __init__(self, x, y, width, height, floor_type='ground', rotation=0):
         """
         Args:
             x, y: 바닥의 중심 좌표 (월드 좌표)
             width, height: 바닥의 크기
             floor_type: 'ground'(땅), 'wall'(벽), 'ceiling'(천장) 등
-            slope_angle: 경사 각도 (도 단위, 0=수평, 양수=오른쪽 상승, 음수=왼쪽 상승)
+            rotation: 회전 각도 (도 단위, 반시계방향)
         """
         self.x = x
         self.y = y
+        self.width = width
+        self.height = height
         self.floor_type = floor_type
-        self.slope_angle = slope_angle
+        self.rotation = rotation  # 회전 각도 (도 단위)
 
         # 충돌체 생성 (offset 0, 중심 기준)
         self.collider = Collider(self, offset_x=0, offset_y=0, width=width, height=height)
         self.collider.active = True
 
-    def get_height_at_x(self, world_x):
-        """특정 x 위치에서의 바닥 높이 계산 (경사 고려)
+    def get_rotated_corners(self):
+        """회전된 사각형의 4개 꼭짓점 좌표를 반환 (월드 좌표)
 
         Returns:
-            float: 해당 x 위치에서의 바닥 표면 높이 (y 좌표)
-            None: 해당 x 위치가 바닥 범위 밖인 경우
+            list: [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
+                  왼쪽 아래부터 반시계방향 순서
         """
-        if self.slope_angle == 0:
-            # 평지인 경우 바닥 상단 높이 반환
-            return self.y + self.collider.height / 2
+        # 회전 전 로컬 좌표 (중심이 원점)
+        half_w = self.width / 2
+        half_h = self.height / 2
 
-        # 바닥의 좌우 끝 위치
-        left = self.x - self.collider.width / 2
-        right = self.x + self.collider.width / 2
+        local_corners = [
+            (-half_w, -half_h),  # 왼쪽 아래
+            (half_w, -half_h),   # 오른쪽 아래
+            (half_w, half_h),    # 오른쪽 위
+            (-half_w, half_h)    # 왼쪽 위
+        ]
 
-        if left <= world_x <= right:
-            # 선형 보간으로 높이 계산
-            ratio = (world_x - left) / self.collider.width
+        # 회전 각도를 라디안으로 변환
+        angle_rad = math.radians(self.rotation)
+        cos_a = math.cos(angle_rad)
+        sin_a = math.sin(angle_rad)
 
-            # 바닥의 상단 기본 높이 (평지일 때의 높이)
-            base_top = self.y + self.collider.height / 2
+        # 회전 행렬 적용 후 월드 좌표로 변환
+        world_corners = []
+        for lx, ly in local_corners:
+            # 회전 행렬: [cos -sin] [x]
+            #           [sin  cos] [y]
+            rotated_x = lx * cos_a - ly * sin_a
+            rotated_y = lx * sin_a + ly * cos_a
 
-            # 경사에 의한 높이 변화량 계산
-            height_diff = self.collider.width * math.tan(math.radians(self.slope_angle))
+            # 월드 좌표로 변환
+            world_x = self.x + rotated_x
+            world_y = self.y + rotated_y
+            world_corners.append((world_x, world_y))
 
-            # 왼쪽 끝 높이 (기본 높이)
-            left_height = base_top
-
-            # 오른쪽 끝 높이 (경사 적용)
-            right_height = base_top + height_diff
-
-            # 보간된 높이
-            return left_height + (right_height - left_height) * ratio
-
-        return None
+        return world_corners
 
     def is_point_inside(self, world_x, world_y):
-        """특정 점이 바닥 내부에 있는지 확인 (경사면 고려)"""
-        left = self.x - self.collider.width / 2
-        right = self.x + self.collider.width / 2
-        bottom = self.y - self.collider.height / 2
+        """특정 점이 회전된 사각형 내부에 있는지 확인 (OBB 충돌)
 
-        # X 범위 체크
-        if not (left <= world_x <= right):
-            return False
+        SAT(Separating Axis Theorem)를 사용한 점-회전사각형 충돌 검사
+        """
+        # 점을 로컬 좌표계로 변환 (역회전)
+        dx = world_x - self.x
+        dy = world_y - self.y
 
-        if self.slope_angle == 0:
-            # 평지인 경우 사각형 충돌
-            top = self.y + self.collider.height / 2
-            return bottom <= world_y <= top
-        else:
-            # 경사면인 경우: 사다리꼴 내부 판정
-            # 해당 x 위치에서의 표면(상단) 높이 계산
-            surface_height = self.get_height_at_x(world_x)
-            if surface_height is None:
-                return False
+        angle_rad = math.radians(-self.rotation)  # 역회전
+        cos_a = math.cos(angle_rad)
+        sin_a = math.sin(angle_rad)
 
-            # 사다리꼴 영역: 하단(고정)과 상단(경사) 사이
-            # 하단은 항상 bottom
-            # 상단은 경사에 따라 변함
+        local_x = dx * cos_a - dy * sin_a
+        local_y = dx * sin_a + dy * cos_a
 
-            # Y 좌표가 하단보다 위에 있고, 표면 높이보다 아래에 있으면 충돌
-            # 표면 위로 약간의 여유 공간 허용 (플레이어가 바닥에 딱 붙어 서있을 수 있도록)
-            tolerance = 5  # 표면 위 허용 오차
-            return bottom <= world_y <= surface_height + tolerance
+        # 로컬 좌표에서 AABB 충돌 검사
+        half_w = self.width / 2
+        half_h = self.height / 2
+
+        return (-half_w <= local_x <= half_w) and (-half_h <= local_y <= half_h)
+
+    def get_top_surface_y(self, world_x):
+        """특정 x 위치에서의 바닥 상단 표면 높이 반환
+
+        회전된 사각형의 상단 모서리 높이를 계산합니다.
+        """
+        corners = self.get_rotated_corners()
+
+        # 상단 두 점 (인덱스 2, 3)
+        top_right = corners[2]
+        top_left = corners[3]
+
+        # x 범위 확인
+        min_x = min(top_left[0], top_right[0])
+        max_x = max(top_left[0], top_right[0])
+
+        if not (min_x <= world_x <= max_x):
+            return None
+
+        # 선형 보간으로 높이 계산
+        if abs(top_right[0] - top_left[0]) < 0.001:
+            # 거의 수직이면 평균 높이 반환
+            return (top_left[1] + top_right[1]) / 2
+
+        ratio = (world_x - top_left[0]) / (top_right[0] - top_left[0])
+        ratio = max(0, min(1, ratio))  # 0~1 사이로 클램프
+
+        return top_left[1] + (top_right[1] - top_left[1]) * ratio
 
     def update(self):
         """업데이트 (필요시 구현)"""
@@ -104,97 +130,48 @@ class FloorObject:
         pass
 
     def draw_debug(self, is_colliding=False, camera_x=0, camera_y=0):
-        """디버그용 충돌 박스 그리기 (경사면 지원)
+        """디버그용 회전된 사각형 충돌 박스 그리기
 
         Args:
             is_colliding: 충돌 중이면 True (빨간색), 아니면 False (초록색)
-            camera_x, camera_y: 카메라 오프셋 (월드 좌표를 스크린 좌표로 변환)
+            camera_x, camera_y: 카메라 오프셋
         """
-        from pico2d import draw_rectangle
-
-        # 평지와 경사면 모두 동일하게 카메라 오프셋 적용
-        left = self.x - self.collider.width / 2
-        right = self.x + self.collider.width / 2
-        bottom = self.y - self.collider.height / 2
-
-        if self.slope_angle == 0:
-            # 평지는 사각형으로 그리기
-            top = self.y + self.collider.height / 2
-
-            # 월드 좌표를 스크린 좌표로 변환
-            screen_left = left - camera_x
-            screen_bottom = bottom - camera_y
-            screen_right = right - camera_x
-            screen_top = top - camera_y
-
-            # 사각형 그리기
-            draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)
+        # 충돌 상태에 따라 색상 설정
+        if is_colliding:
+            draw_color = (255, 0, 0)  # 빨간색
         else:
-            # 경사면은 사다리꼴 모양으로 그리기
-            # 왼쪽과 오른쪽의 높이 계산
-            left_height = self.get_height_at_x(left)
-            right_height = self.get_height_at_x(right)
+            draw_color = (0, 255, 0)  # 초록색
 
-            if left_height is None or right_height is None:
-                return
+        # 회전된 4개 꼭짓점 가져오기
+        corners = self.get_rotated_corners()
 
-            # 월드 좌표를 스크린 좌표로 변환 (카메라 오프셋 적용)
-            x1 = left - camera_x  # 왼쪽 아래
-            y1 = bottom - camera_y
-            x2 = right - camera_x  # 오른쪽 아래
-            y2 = bottom - camera_y
-            x3 = right - camera_x  # 오른쪽 위
-            y3 = right_height - camera_y
-            x4 = left - camera_x  # 왼쪽 위
-            y4 = left_height - camera_y
+        # 스크린 좌표로 변환
+        screen_corners = [
+            (x - camera_x, y - camera_y)
+            for x, y in corners
+        ]
 
-            # 사다리꼴의 4개 변을 선으로 그리기
-            # 하단 (y1 == y2이므로 수평선)
-            draw_rectangle(x1, y1, x2, y1 + 2)
+        # 4개의 변을 선으로 그리기
+        for i in range(4):
+            start = screen_corners[i]
+            end = screen_corners[(i + 1) % 4]  # 마지막은 첫 번째로 연결
 
-            # 왼쪽 변 (수직 또는 약간 기울어진 선)
-            steps = max(2, int(abs(y4 - y1)))
-            for i in range(steps):
-                ratio = i / steps
-                px = x1 + (x4 - x1) * ratio
-                py = y1 + (y4 - y1) * ratio
+            # 선분을 작은 사각형들로 표현 (pico2d에는 draw_line이 없음)
+            distance = math.sqrt((end[0] - start[0])**2 + (end[1] - start[1])**2)
+            steps = max(2, int(distance))
+
+            for j in range(steps):
+                ratio = j / steps if steps > 1 else 0
+                px = start[0] + (end[0] - start[0]) * ratio
+                py = start[1] + (end[1] - start[1]) * ratio
                 draw_rectangle(px, py, px + 2, py + 2)
-
-            # 오른쪽 변
-            steps = max(2, int(abs(y3 - y2)))
-            for i in range(steps):
-                ratio = i / steps
-                px = x2 + (x3 - x2) * ratio
-                py = y2 + (y3 - y2) * ratio
-                draw_rectangle(px, py, px + 2, py + 2)
-
-            # 상단 (경사진 선)
-            steps = max(2, int(abs(x3 - x4)))
-            for i in range(steps):
-                ratio = i / steps
-                px = x4 + (x3 - x4) * ratio
-                py = y4 + (y3 - y4) * ratio
-                draw_rectangle(px, py, px + 2, py + 2)
-
-    def on_collision(self, group, other):
-        """충돌 콜백 - 바닥은 특별한 반응 없음"""
-        pass
-
-    @staticmethod
-    def create_from_rect(left, bottom, right, top, floor_type='ground', slope_angle=0):
-        """사각형 좌표로 바닥 생성"""
-        x = (left + right) / 2
-        y = (bottom + top) / 2
-        width = right - left
-        height = top - bottom
-        return FloorObject(x, y, width, height, floor_type, slope_angle)
 
 
 class FloorManager:
-    """바닥 객체들을 관리하는 매니저"""
+    """바닥 객체들을 관리하는 매니저 클래스"""
 
     def __init__(self):
-        self.floors = []  # FloorObject 리스트
+        self.floors = []  # 바닥 객체 리스트
 
     def add_floor(self, floor):
         """바닥 추가"""
@@ -205,9 +182,16 @@ class FloorManager:
         if floor in self.floors:
             self.floors.remove(floor)
 
-    def clear(self):
-        """모든 바닥 제거"""
-        self.floors.clear()
+    def get_all_floors(self):
+        """모든 바닥 객체 리스트 반환"""
+        return self.floors
+
+    def get_floor_at(self, world_x, world_y):
+        """특정 위치에 있는 바닥 반환"""
+        for floor in self.floors:
+            if floor.is_point_inside(world_x, world_y):
+                return floor
+        return None
 
     def update(self):
         """모든 바닥 업데이트"""
@@ -215,15 +199,15 @@ class FloorManager:
             floor.update()
 
     def draw(self):
-        """렌더링 (실제로는 아무것도 안 그림)"""
+        """렌더링 (바닥은 충돌체만 있으므로 기본적으로 아무것도 안 그림)"""
         pass
 
-    def draw_debug(self, colliding_floors=None, camera_x=0, camera_y=0):
-        """디버그용 모든 바닥 그리기
+    def draw_debug(self, camera_x=0, camera_y=0, colliding_floors=None):
+        """모든 바닥 디버그 그리기
 
         Args:
-            colliding_floors: 충돌 중인 바닥 객체들의 집합
             camera_x, camera_y: 카메라 오프셋
+            colliding_floors: 충돌 중인 바닥들의 집합 (빨간색으로 표시)
         """
         if colliding_floors is None:
             colliding_floors = set()
@@ -232,61 +216,45 @@ class FloorManager:
             is_colliding = floor in colliding_floors
             floor.draw_debug(is_colliding, camera_x, camera_y)
 
-    def save_to_dict(self):
-        """저장용 딕셔너리로 변환"""
-        return {
+    def save_to_file(self, filename):
+        """바닥 정보를 JSON 파일로 저장"""
+        data = {
             'floors': [
                 {
                     'x': floor.x,
                     'y': floor.y,
-                    'width': floor.collider.width,
-                    'height': floor.collider.height,
-                    'type': floor.floor_type,
-                    'slope_angle': floor.slope_angle
+                    'width': floor.width,
+                    'height': floor.height,
+                    'floor_type': floor.floor_type,
+                    'rotation': floor.rotation
                 }
                 for floor in self.floors
             ]
         }
 
-    def save_to_file(self, filename):
-        """파일로 저장"""
-        import json
-        data = self.save_to_dict()
         with open(filename, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
-        print(f"바닥 데이터 저장 완료: {filename} ({len(self.floors)}개)")
 
-    def load_from_dict(self, data):
-        """딕셔너리에서 복원"""
-        self.clear()
-        if 'floors' in data:
-            for floor_data in data['floors']:
-                floor = FloorObject(
-                    floor_data['x'],
-                    floor_data['y'],
-                    floor_data['width'],
-                    floor_data['height'],
-                    floor_data.get('type', 'ground'),
-                    floor_data.get('slope_angle', 0)
-                )
-                self.add_floor(floor)
-        print(f"바닥 {len(self.floors)}개 로드 완료")
+        print(f"바닥 정보 저장 완료: {filename} ({len(self.floors)}개)")
 
     @staticmethod
     def load_from_file(filename):
-        """파일에서 로드하여 새 FloorManager 반환"""
-        import json
-        manager = FloorManager()
-        try:
-            with open(filename, 'r', encoding='utf-8') as f:
-                data = json.load(f)
-                manager.load_from_dict(data)
-        except FileNotFoundError:
-            print(f"바닥 파일을 찾을 수 없습니다: {filename}")
-        except Exception as e:
-            print(f"바닥 로드 실패: {e}")
-        return manager
+        """JSON 파일에서 바닥 정보 로드"""
+        with open(filename, 'r', encoding='utf-8') as f:
+            data = json.load(f)
 
-    def get_all_floors(self):
-        """모든 바닥 객체 반환"""
-        return self.floors
+        manager = FloorManager()
+
+        for floor_data in data.get('floors', []):
+            floor = FloorObject(
+                x=floor_data['x'],
+                y=floor_data['y'],
+                width=floor_data['width'],
+                height=floor_data['height'],
+                floor_type=floor_data.get('floor_type', 'ground'),
+                rotation=floor_data.get('rotation', 0)
+            )
+            manager.add_floor(floor)
+
+        print(f"바닥 정보 로드 완료: {filename} ({len(manager.floors)}개)")
+        return manager

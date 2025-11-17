@@ -28,6 +28,27 @@ class Idle:
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
 
+        # 물리 처리
+        dt = game_framework.time_manager.get_fixed_dt()
+
+        # 바닥 체크
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+
+        if char_bottom > 0:
+            # 공중에 있을 때 중력 적용
+            self.penintent.vy += self.penintent.gravity * dt
+            if self.penintent.vy < self.penintent.max_fall_speed:
+                self.penintent.vy = self.penintent.max_fall_speed
+            self.penintent.is_grounded = False
+        else:
+            # 바닥에 닿았을 때
+            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
+
+        # 위치 업데이트
+        self.penintent.y += self.penintent.vy * dt
+
     def draw(self):
         if self.penintent.current_animation:
             self.penintent.current_animation.draw(self.penintent.x, self.penintent.y)
@@ -134,10 +155,30 @@ class Run:
         pass
 
     def do(self):
-        # 애니메이션만 업데이트 (물리는 Penintent.update()에서 처리)
-
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
+
+        # 물리 처리
+        dt = game_framework.time_manager.get_fixed_dt()
+
+        # 바닥 체크
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+
+        if char_bottom > 0:
+            # 공중에 있을 때 중력 적용
+            self.penintent.vy += self.penintent.gravity * dt
+            if self.penintent.vy < self.penintent.max_fall_speed:
+                self.penintent.vy = self.penintent.max_fall_speed
+            self.penintent.is_grounded = False
+        else:
+            # 바닥에 닿았을 때
+            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
+
+        # 위치 업데이트
+        self.penintent.x += self.penintent.vx * dt
+        self.penintent.y += self.penintent.vy * dt
 
     def draw(self):
         if self.penintent.current_animation:
@@ -174,11 +215,32 @@ class Start_Run:
         pass
 
     def do(self):
-        # 애니메이션만 업데이트 (물리는 Penintent.update()에서 처리)
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
             if self.penintent.current_animation.is_animation_end():
                 self.penintent.state_machine.handle_state_event(('ANIMATION_END',None))
+
+        # 물리 처리
+        dt = game_framework.time_manager.get_fixed_dt()
+
+        # 바닥 체크
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+
+        if char_bottom > 0:
+            # 공중에 있을 때 중력 적용
+            self.penintent.vy += self.penintent.gravity * dt
+            if self.penintent.vy < self.penintent.max_fall_speed:
+                self.penintent.vy = self.penintent.max_fall_speed
+            self.penintent.is_grounded = False
+        else:
+            # 바닥에 닿았을 때
+            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
+
+        # 위치 업데이트
+        self.penintent.x += self.penintent.vx * dt
+        self.penintent.y += self.penintent.vy * dt
 
     def draw(self):
         if self.penintent.current_animation:
@@ -338,13 +400,9 @@ class Dodge:
         if 8<= current_frame <= 13:
             # 마찰력으로 속도 감소
             self.slide_speed *= 0.92
-
             self.penintent.vx = self.slide_speed
         else:
-
             self.penintent.vx = 0
-
-
 
         # ✅ Attack 종료 시 현재 키 상태 확인
         key_manager = game_framework.key_manager
@@ -358,9 +416,6 @@ class Dodge:
         d_held = key_manager.is_held(SDLK_d)
         s_held = key_manager.is_held(SDLK_s)
 
-
-
-
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
             if self.penintent.current_animation.is_animation_end():
@@ -371,11 +426,8 @@ class Dodge:
                             self.penintent.state_machine.handle_state_event(('S_HELD', None))
                         elif d_pressed:
                             self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
-
                         else:
                             self.penintent.state_machine.handle_state_event(('A_HELD', None))
-
-
                     elif d_held:
                         if s_pressed:
                             self.penintent.state_machine.handle_state_event(('S_HELD', None))
@@ -383,7 +435,6 @@ class Dodge:
                             self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
                         else:
                             self.penintent.state_machine.handle_state_event(('D_HELD', None))
-
                     elif s_held:
                         if a_pressed or d_pressed:
                             self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
@@ -392,6 +443,24 @@ class Dodge:
                 else:
                     self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
 
+        # 물리 처리
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+
+        if char_bottom > 0:
+            # 공중에 있을 때 중력 적용
+            self.penintent.vy += self.penintent.gravity * dt
+            if self.penintent.vy < self.penintent.max_fall_speed:
+                self.penintent.vy = self.penintent.max_fall_speed
+            self.penintent.is_grounded = False
+        else:
+            # 바닥에 닿았을 때
+            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
+
+        # 위치 업데이트
+        self.penintent.x += self.penintent.vx * dt
+        self.penintent.y += self.penintent.vy * dt
 
     def draw(self):
         if self.penintent.current_animation:
@@ -538,11 +607,11 @@ class Parry_Success:
 class Jump:
     def __init__(self, penintent):
         self.penintent = penintent
-        self.upandown = 0
+        self.upanddown = 0
     def enter(self, e):
         self.penintent.set_animation('jump')
         self.penintent.current_animation.set_delay(0.2)
-        self.upandown = 0
+        self.upanddown = 0
         # ✅ Attack 종료 시 현재 키 상태 확인
         key_manager = game_framework.key_manager
 
@@ -612,21 +681,45 @@ class Jump:
         if self.penintent.current_animation:
             self.penintent.current_animation.update()
             if self.penintent.current_animation.is_animation_end():
-                if self.upandown == 0:
+                if self.upanddown == 0:
                     self.penintent.set_animation('jump_off')
                     self.penintent.current_animation.set_delay(0.1)
-                    self.upandown = 1
-                elif self.upandown == 1:
+                    self.upanddown = 1
+                elif self.upanddown == 1:
                     if a_held or d_held:
                         if a_held:
                             if d_held:
                                 self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
-                        else:
-                            self.penintent.state_machine.handle_state_event(('A_HELD', None))
+                            else:
+                                self.penintent.state_machine.handle_state_event(('A_HELD', None))
+                        elif d_held:
+                            if a_held:
+                                self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
+                            else:
+                                self.penintent.state_machine.handle_state_event(('D_HELD', None))
+
                     else:
                         self.penintent.state_machine.handle_state_event(('ANIMATION_END', None))
                     self.penintent.current_animation.set_delay(0.05)
 
+        # 물리 처리 - Jump는 항상 중력 영향을 받음
+        dt = game_framework.time_manager.get_fixed_dt()
+
+        # 중력 적용
+        self.penintent.vy += self.penintent.gravity * dt
+        if self.penintent.vy < self.penintent.max_fall_speed:
+            self.penintent.vy = self.penintent.max_fall_speed
+
+        # 위치 업데이트
+        self.penintent.x += self.penintent.vx * dt
+        self.penintent.y += self.penintent.vy * dt
+
+        # 바닥 체크
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+        if char_bottom <= 0:
+            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
 
     def draw(self):
         if self.penintent.current_animation:
@@ -670,7 +763,7 @@ class Penintent:
             'jump', 'jump_off', 'jump_front'
         ]
 
-        self.x, self.y = 100,200
+        self.x, self.y = 400,500
         self.face_dir = 1
         # 물리 속성
         self.vx = 0
@@ -764,12 +857,7 @@ class Penintent:
             }
         )
 
-        # 지형 충돌용 속성
-        self.terrain_tilemap = None  # 지형 타일맵 참조
-        self.decoration_tilemap = None  # 장식 타일맵 참조
-
         self.is_grounded = False  # 땅에 닿아있는지 여부
-        self.ground_contact_count = 0  # 바닥과 접촉 카운트 (매 프레임 초기화)
 
 
     def apply_attack_collider_preset(self, ani_name):
@@ -863,116 +951,23 @@ class Penintent:
         pass
 
     def update(self):
-
         # 키 입력을 이벤트로 변환
-        # SDL 이벤트 객체를 직접 전달
         for event in game_framework.key_manager.get_pressed_events():
             self.state_machine.handle_state_event(('INPUT', event))
 
         for event in game_framework.key_manager.get_released_events():
             self.state_machine.handle_state_event(('INPUT', event))
 
+        # 상태 머신 업데이트 - 각 상태의 do()에서 물리 처리가 실행됨
         self.state_machine.update()
 
-        # 바닥 접촉 카운트 초기화 (충돌 체크 전)
-        self.ground_contact_count = 0
-
-        # 중력 적용 (아래 방향으로)
-        if not self.is_grounded:
-            dt = game_framework.time_manager.get_fixed_dt()
-            self.vy += self.gravity * dt  # gravity가 음수이므로 더하면 아래로 떨어짐
-
-            # 최대 낙하 속도 제한
-            if self.vy < self.max_fall_speed:
-                self.vy = self.max_fall_speed
-
-        # 위치 업데이트
-        dt = game_framework.time_manager.get_fixed_dt()
-        self.x += self.vx * dt
-        self.y += self.vy * dt
-
     def on_collision(self, group, other):
-        """Collider Manager로부터 호출되는 충돌 콜백"""
-        if group == 'player:floor':
-            # 바닥과 충돌
-            from floor_object import FloorObject
-            if isinstance(other, FloorObject):
-                # 바닥 위에 있는지 확인 (캐릭터 발이 바닥보다 위에 있음)
-                char_bottom = self.y - self.collider.height / 2
-                floor_top = other.y + other.collider.height / 2
-
-                # 아래로 떨어지고 있고, 캐릭터가 바닥 위쪽에 있을 때만 착지
-                if self.vy <= 0 and char_bottom >= floor_top - 10:
-                    self.y = floor_top + self.collider.height / 2
-                    self.vy = 0
-                    self.is_grounded = True
-                    self.ground_contact_count += 1
+        """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
+        pass
 
     def check_terrain_collision(self):
-        """지형과의 충돌 검사 및 처리"""
-        self.is_grounded = False
-
-        # 체크할 타일맵 목록
-        tilemaps_to_check = []
-        if self.terrain_tilemap:
-            tilemaps_to_check.append(self.terrain_tilemap)
-        if self.decoration_tilemap:
-            tilemaps_to_check.append(self.decoration_tilemap)
-
-        # 디버그: 타일맵 연결 상태 확인
-        if not tilemaps_to_check:
-            # print("Warning: No tilemaps connected for collision check")
-            return
-
-        for tilemap in tilemaps_to_check:
-            # 발 아래 충돌 체크 (착지)
-            foot_y = self.y - self.collider.height / 2
-            collided, tile_rect = tilemap.check_collision_with_solid(
-                self.x, foot_y, self.collider.width, 5
-            )
-
-            if collided:
-                # 디버그 정보
-                # print(f"Ground collision at ({self.x:.1f}, {foot_y:.1f}) with tile at ({tile_rect['x']:.1f}, {tile_rect['y']:.1f})")
-
-                # 타일 위에 올려놓기
-                self.y = tile_rect['y'] + tile_rect['height'] / 2 + self.collider.height / 2
-                self.vy = 0
-                self.is_grounded = True
-                break
-
-            # 머리 위 충돌 체크 (천장)
-            if self.vy > 0:
-                head_y = self.y + self.collider.height / 2
-                collided, tile_rect = tilemap.check_collision_with_solid(
-                    self.x, head_y, self.collider.width, 5
-                )
-
-                if collided:
-                    # 디버그 정보
-                    # print(f"Ceiling collision at ({self.x:.1f}, {head_y:.1f})")
-
-                    # 천장에 부딪힘
-                    self.y = tile_rect['y'] - tile_rect['height'] / 2 - self.collider.height / 2
-                    self.vy = 0
-
-            # 좌우 벽 충돌 체크
-            if self.vx != 0:
-                side_x = self.x + (self.collider.width / 2 * (1 if self.vx > 0 else -1))
-                collided, tile_rect = tilemap.check_collision_with_solid(
-                    side_x, self.y, 5, self.collider.height
-                )
-
-                if collided:
-                    # 디버그 정보
-                    # print(f"Wall collision at ({side_x:.1f}, {self.y:.1f})")
-
-                    # 벽에 부딪힘
-                    if self.vx > 0:
-                        self.x = tile_rect['x'] - tile_rect['width'] / 2 - self.collider.width / 2
-                    else:
-                        self.x = tile_rect['x'] + tile_rect['width'] / 2 + self.collider.width / 2
-                    self.vx = 0
+        """지형과의 충돌 검사 (현재 사용 안 함)"""
+        pass
 
     def handle_event(self, event):
         pass

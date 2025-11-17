@@ -325,17 +325,3 @@ class TileMap:
             if abs(tile.x - x) < threshold and abs(tile.y - y) < threshold:
                 return tile
         return None
-
-    def get_solid_tiles_in_area(self, x, y, width, height):
-        """특정 영역내의 solid타일 목록 반환
-        현재는 타일맵과의 충돌 처리를 제거하기 위해 항상 빈 목록을 반환합니다.
-        """
-        # 충돌 체크를 완전히 비활성화하여 다른 오브젝트들이 타일맵과 충돌하지 않도록 함
-        return []
-
-
-    def check_collision_with_solid(self,x,y,width,height):
-        """특정 영역과 충돌하는 solid 타일이 있는지 검사
-        충돌 처리를 제거하기 위해 항상 (False, None)을 반환합니다.
-        """
-        return False, None
