@@ -3,6 +3,6 @@ import game_framework
 import play_mode as start_mode
 
 
-open_canvas(1080, 960)
+open_canvas(1980, 1080)
 game_framework.run(start_mode)
 close_canvas()

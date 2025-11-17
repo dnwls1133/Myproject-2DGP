@@ -1,4 +1,5 @@
 import machine.collider_manager
+from machine import collider_manager
 
 world = [[] for _ in range(7)]  # layers for game objects
 

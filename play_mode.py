@@ -6,6 +6,7 @@ import game_world
 import game_framework
 import machine.collider_manager
 from penintent import Penintent
+from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles
 from floor_object import FloorManager, FloorObject
@@ -27,6 +28,7 @@ def handle_events():
 
 def init():
     global anim_manager, floor_manager
+    game_framework.camera_manager.set_world_size(1350,1000)
     game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
@@ -88,11 +90,17 @@ def init():
     game_world.add_object(penintent, 3)
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
+    elderbrother = ElderBrother(anim_manager)
+    game_world.add_object(elderbrother, 3)
+    print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
+
     # 충돌 페어 등록: 플레이어 vs 바닥
     # for floor in floor_manager.get_all_floors():
     #     machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
     #
     # print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
+
+
 
 def update():
     camera_speed = 5

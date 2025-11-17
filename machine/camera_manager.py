@@ -176,6 +176,11 @@ class CameraManager:
         screen_y = rel_y * self.screen_height
         return screen_x, screen_y
 
+    def set_world_size(self, world_width, world_height):
+        """게임 월드의 크기를 설정합니다."""
+        self.world_width = world_width
+        self.world_height = world_height
+
     def set_window_size(self,width,height):
         """카메라 윈도우 크기를 설정합니다. (작을수록 확대)"""
         self.window_width = width

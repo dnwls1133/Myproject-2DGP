@@ -961,6 +961,7 @@ class Penintent:
         # 상태 머신 업데이트 - 각 상태의 do()에서 물리 처리가 실행됨
         self.state_machine.update()
 
+
     def on_collision(self, group, other):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
         pass

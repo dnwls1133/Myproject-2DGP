@@ -80,10 +80,24 @@ def register_animations(anim_manager):
         "sprites/player/texture2d/player_jump/penitent_jum_forward_anim.png"
     )
     anim_manager.register_animation(
-        'elder_boss_jump',
+        'elder_brother_idle',
+        "sprites/elderbrother/texture2d/elderBrother_idle_anim.json",
+        "sprites/elderbrother/texture2d/elderBrother_idle_anim.png"
+    )
+    anim_manager.register_animation(
+        'elder_brother_attack',
+        "sprites/elderbrother/texture2d/elderBrother_attack_anim.json",
+        "sprites/elderbrother/texture2d/elderBrother_attack_anim.png"
+    )
+    anim_manager.register_animation(
+        'elder_brother_death',
+        "sprites/elderbrother/texture2d/elderBrother_death_anim.json",
+        "sprites/elderbrother/texture2d/elderBrother_death_anim.png"
+    )
+    anim_manager.register_animation(
+        'elder_brother_jump',
         "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.json",
         "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.png"
-
     )
 
 
