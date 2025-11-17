@@ -102,7 +102,7 @@ class CameraManager:
 
         # Y축 처리
         if self.world_height is not None:
-            half_h = self.screen_height / 2
+            half_h = self.window_height / 2
             cam_min_y = half_h
             cam_max_y = self.world_height - half_h
 
@@ -146,10 +146,10 @@ class CameraManager:
 
         # 최종 경계 클램프 (음수 영역 포함)
         if self.world_width is not None:
-            half_w = self.screen_width / 2
+            half_w = self.window_width / 2
             final_x = max(half_w, min(final_x, self.world_width - half_w))
         if self.world_height is not None:
-            half_h = self.screen_height / 2
+            half_h = self.window_height / 2
             final_y = max(half_h, min(final_y, self.world_height - half_h))
 
         self.camera_x = final_x
