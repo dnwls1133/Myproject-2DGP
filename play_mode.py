@@ -85,14 +85,14 @@ def init():
     # 플레이어에게 타일맵 참조 전달
     penintent.terrain_tilemap = tilemap_terrain
     penintent.decoration_tilemap = tilemap_deco
-    game_world.add_object(penintent, 2)
+    game_world.add_object(penintent, 3)
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
     # 충돌 페어 등록: 플레이어 vs 바닥
-    for floor in floor_manager.get_all_floors():
-        machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
-
-    print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
+    # for floor in floor_manager.get_all_floors():
+    #     machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
+    #
+    # print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
 
 def update():
     camera_speed = 5

@@ -34,7 +34,7 @@ class Idle:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > 0:
+        if char_bottom > self.penintent.ground:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
@@ -42,7 +42,7 @@ class Idle:
             self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
 
@@ -164,7 +164,7 @@ class Run:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > 0:
+        if char_bottom > self.penintent.ground:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
@@ -172,7 +172,7 @@ class Run:
             self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
 
@@ -226,7 +226,7 @@ class Start_Run:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > 0:
+        if char_bottom > self.penintent.ground:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
@@ -234,7 +234,7 @@ class Start_Run:
             self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
 
@@ -446,7 +446,7 @@ class Dodge:
         # 물리 처리
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > 0:
+        if char_bottom > self.penintent.ground:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
@@ -454,7 +454,7 @@ class Dodge:
             self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.collider.height / 2
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
 
@@ -716,8 +716,8 @@ class Jump:
 
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
-        if char_bottom <= 0:
-            self.penintent.y = self.penintent.collider.height / 2
+        if char_bottom <= self.penintent.ground:
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
 
@@ -770,14 +770,14 @@ class Penintent:
         self.vy = 0
 
         self.on_ground = False
-
+        self.ground = 100
         # 물리 상수
         self.gravity = -1233.0  # 중력 가속도
         self.max_fall_speed = -1000.0  # 최대 낙하 속도
         self.friction = 0.8  # 마찰 계수
 
         # 이동 상수
-        self.move_speed = 300.0  # 이동 속도
+        self.move_speed = 250.0  # 이동 속도
         self.jump_speed = 600.0  # 점프 속도
 
 

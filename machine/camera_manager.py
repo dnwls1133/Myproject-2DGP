@@ -74,7 +74,7 @@ class CameraManager:
 
         # X축 처리
         if self.world_width is not None:
-            half_w = self.screen_width / 2
+            half_w = self.window_width / 2
             cam_min = half_w
             cam_max = self.world_width - half_w
 
