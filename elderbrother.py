@@ -128,6 +128,12 @@ class Jump:
 
         current_frame = self.elder_brother.current_animation.current_frame
         # 점프 애니메이션 프레임에 따른 수직 속도 조절
+
+        if 20 <= current_frame <= 24:
+            self.elder_brother.jump_attack_collider.active = True
+        else:
+            self.elder_brother.jump_attack_collider.active = False
+
         if 9<= current_frame :
             # 물리 처리
             dt = game_framework.time_manager.get_fixed_dt()
@@ -166,6 +172,9 @@ class Attack:
         self.elder_brother.vx = 0
         self.elder_brother.set_animation('elder_brother_attack')
         self.elder_brother.current_animation.set_delay(0.05)
+
+
+
         # 플레이어 방향보기
         player = self.elder_brother.get_player()
 
@@ -190,6 +199,12 @@ class Attack:
 
         # 물리 처리
         dt = game_framework.time_manager.get_fixed_dt()
+
+        current_frame = self.elder_brother.current_animation.current_frame
+        if 16 <= current_frame <= 20:
+            self.elder_brother.attack_collider.active = True
+        else:
+            self.elder_brother.attack_collider.active = False
 
         # 바닥 체크
         char_bottom = self.elder_brother.y - self.elder_brother.collider.height / 2
@@ -273,12 +288,15 @@ class ElderBrother:
 
         self.collider = Collider(self, offset_x=0, offset_y=0, width=159, height=171)
 
-        self.attack_collider = Collider(self, offset_x=60, offset_y=0, width=80, height=90)
+        self.attack_collider = Collider(self, offset_x=80, offset_y=0, width=60, height=170)
         self.attack_collider.active = False
 
-        self.jump_attack_collider = Collider(self, offset_x=60, offset_y=0, width=80, height=90)
+        self.jump_attack_collider = Collider(self, offset_x=0, offset_y=-50, width=180, height=90)
         self.jump_attack_collider.active = False
 
+        self.attack_collider_presets = {
+            'elder_brother_attack': {'offset_x': 80, 'offset_y': 0, 'width': 60, 'height': 170}
+        }
 
         anim_names = ['elder_brother_idle',
                       'elder_brother_attack',
@@ -329,12 +347,39 @@ class ElderBrother:
             }
         )
 
+    def apply_attack_collider_preset(self, ani_name):
+        """공격 충돌체 프리셋 적용"""
+        preset = self.attack_collider_presets.get(ani_name)
+        if not preset:
+            self.attack_collider.active = False
+            return
+
+        ox = preset['offset_x']
+        oy = preset['offset_y']
+        w = preset['width']
+        h = preset['height']
+
+        # 방향에 따라 x offset 반전
+        if self.face_dir == -1:
+            ox = -ox
+
+        self.attack_collider.set_offset_and_size(ox, oy, w, h)
+
+
+
     def set_animation(self, name):
         """ 애니메이션 변경"""
         if name in self.animations:
             self.current_animation = self.animations[name]
             self.current_animation.current_frame = 0
             self.current_animation.frame_time = 0
+
+            if name == 'elder_brother_attack':
+                self.apply_attack_collider_preset(name)
+            else:
+                self.attack_collider.active = False
+
+
 
 
     def get_player(self):
@@ -356,7 +401,13 @@ class ElderBrother:
 
     def on_collision(self, group, other):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
-        pass
+        if group == 'player_attack:elderBrother':
+            # 플레이어의 공격에 맞았을 때 처리
+            self.hp -= 10
+            print(f"Elder Brother HP: {self.hp}")
+            if self.hp <= 0:
+                self.state_machine.handle_state_event(('DEATH', None))
+
 
     def draw(self):
         self.state_machine.draw()
@@ -364,3 +415,9 @@ class ElderBrother:
             self.current_animation.draw(self.x, self.y)
 
         self.collider.draw_debug()
+
+        if self.attack_collider.active:
+            self.attack_collider.draw_debug()
+
+        if self.jump_attack_collider.active:
+            self.jump_attack_collider.draw_debug()

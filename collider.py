@@ -11,6 +11,7 @@ class Collider:
         self.height = height # 충돌체의 높이
         self.active = True # 충돌체 활성화 여부
         self.is_colliding = False  # 현재 충돌 중인지 여부
+        self.was_colliding = False  # 이전 프레임에 충돌 중이었는지 여부
 
     def set_offset(self, offset_x, offset_y):
         """충돌체 오프셋 설정"""

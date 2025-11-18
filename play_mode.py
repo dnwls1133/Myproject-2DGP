@@ -94,6 +94,22 @@ def init():
     game_world.add_object(elderbrother, 3)
     print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
 
+    # 충돌 페어 등록 : 플레이어 공격 -> 엘더 형님 본체
+    machine.collider_manager.add_collision_pair(
+        'player_attack:elderBrother',
+        penintent,
+        elderbrother
+    )
+
+    # 충돌 페어 등록 : 엘더 형님 공격 -> 플레이어 본체
+    machine.collider_manager.add_collision_pair(
+        'elderBrother_attack:player',
+        elderbrother,
+        penintent
+    )
+
+    print("충돌 페어 등록 완료")
+
     # 충돌 페어 등록: 플레이어 vs 바닥
     # for floor in floor_manager.get_all_floors():
     #     machine.collider_manager.add_collision_pair('player:floor', penintent, floor)

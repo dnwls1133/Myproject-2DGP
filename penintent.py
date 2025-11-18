@@ -881,6 +881,8 @@ class Penintent:
         self.attack_collider.active = True
 
 
+
+
     def apply_collider_preset(self, ani_name):
         preset = self.collider_presets.get(ani_name)
         if not preset:
@@ -965,6 +967,8 @@ class Penintent:
 
     def on_collision(self, group, other):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
+        if group == 'elderBrother_attack:player':
+            print("플레이어 피격!")
         pass
 
     def check_terrain_collision(self):
