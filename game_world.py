@@ -22,6 +22,14 @@ def remove_object(o):
     raise Exception("World 에 존재하지 않는 오브젝트를 지우려고 시도함")
 
 
+def get_penintent():
+    for layer in world:
+        for o in layer:
+            if o.__class__.__name__ == 'Penintent':
+                return o
+    return None
+
+
 def update():
     for layer in world:
         for o in layer:

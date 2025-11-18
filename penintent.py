@@ -737,6 +737,7 @@ class Penintent:
         self.attack_collider = Collider(self, offset_x = 60, offset_y = 0, width = 80, height = 90)
         self.attack_collider.active = False
 
+
         # 애니메이션별 콜라이더 프리셋: (offset_x, offset_y, width, height)
         # 필요하면 애니메이션 이름과 값들을 튜닝
         self.collider_presets = {

@@ -32,6 +32,12 @@ def check_collisions(group):
     a_list, b_list = collision_pairs[group]
 
     for a in a_list:
+
+        a_colliders = []
+
+
+
+
         if not hasattr(a, 'collider') or not a.collider.active:
             continue
 
