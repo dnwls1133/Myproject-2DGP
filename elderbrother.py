@@ -398,16 +398,21 @@ class ElderBrother:
         # 상태 머신 업데이트 - 각 상태의 do()에서 물리 처리가 실행됨
         self.state_machine.update()
 
+    def on_collision_enter(self, group, other, collider_type):
 
-    def on_collision(self, group, other):
-        """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
-        if group == 'player_attack:elderBrother':
-            # 플레이어의 공격에 맞았을 때 처리
+        if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
             self.hp -= 10
             print(f"Elder Brother HP: {self.hp}")
             if self.hp <= 0:
                 self.state_machine.handle_state_event(('DEATH', None))
 
+    def on_collision(self, group, other, collider_type):
+        """충돌 지속"""
+        pass  # 필요시 구현
+
+    def on_collision_exit(self, group, other, collider_type):
+        """충돌 종료"""
+        pass  # 필요시 구현
 
     def draw(self):
         self.state_machine.draw()

@@ -61,7 +61,7 @@ class Attack:
 
     def enter(self, e):
         self.penintent.set_animation('attack')
-        #self.penintent.current_animation.set_stop_point(10)
+        self.penintent.current_animation.set_stop_point(10)
 
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
@@ -965,11 +965,19 @@ class Penintent:
         self.state_machine.update()
 
 
-    def on_collision(self, group, other):
+    def on_collision_enter(self, group, other,collider_type):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
-        if group == 'elderBrother_attack:player':
+        if group == 'elderBrother_attack:player' and collider_type == 'base':
             print("플레이어 피격!")
         pass
+
+    def on_collision(self, group, other, collider_type):
+        """충돌 지속"""
+        pass  # 필요시 구현
+
+    def on_collision_exit(self, group, other, collider_type):
+        """충돌 종료"""
+        pass  # 필요시 구현
 
     def check_terrain_collision(self):
         """지형과의 충돌 검사 (현재 사용 안 함)"""

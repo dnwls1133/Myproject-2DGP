@@ -47,6 +47,11 @@ def check_collisions(group):
         if hasattr(a, 'jump_attack_collider') and a.jump_attack_collider.active:
             a_attack_colliders.append(('jump_attack', a.jump_attack_collider))
 
+
+
+
+
+
         # a의 기본 충돌체
         a_base_collider = None
         if hasattr(a, 'collider') and a.collider.active:
@@ -62,6 +67,8 @@ def check_collisions(group):
             if hasattr(b, 'jump_attack_collider') and b.jump_attack_collider.active:
                 b_attack_colliders.append(('jump_attack', b.jump_attack_collider))
 
+
+
             # b의 기본 충돌체
             b_base_collider = None
             if hasattr(b, 'collider') and b.collider.active:
@@ -73,6 +80,7 @@ def check_collisions(group):
                     collision_key = (id(a_attack), id(b_base_collider))
 
                     if a_attack.collides_with(b_base_collider):
+
                         a_attack.is_colliding = True
                         b_base_collider.is_colliding = True
                         current_collisions.add(collision_key)
@@ -99,6 +107,7 @@ def check_collisions(group):
                     collision_key = (id(b_attack), id(a_base_collider))
 
                     if b_attack.collides_with(a_base_collider):
+
                         b_attack.is_colliding = True
                         a_base_collider.is_colliding = True
                         current_collisions.add(collision_key)
