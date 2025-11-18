@@ -16,7 +16,8 @@ class Idle:
     def enter(self, e):
 
         self.elder_brother.vx = 0
-        self.elder_brother.set_animation('elder_brother_idle')
+        self.elder_brother.set_animation('elder_brother_death')
+        self.elder_brother.current_animation.set_delay(0.1)
         if self.elder_brother.face_dir == 1:
             self.elder_brother.current_animation.set_flip('')
         else:

@@ -1,0 +1,116 @@
+{
+  "floors": [
+    {
+      "x": 552.5,
+      "y": 314.5,
+      "width": 165,
+      "height": 55,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 670.0,
+      "y": 295.5,
+      "width": 64,
+      "height": 47,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 746.0,
+      "y": 240.0,
+      "width": 80,
+      "height": 82,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 848.5,
+      "y": 196.0,
+      "width": 135,
+      "height": 60,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 941.5,
+      "y": 142.5,
+      "width": 55,
+      "height": 47,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 1019.0,
+      "y": 110.5,
+      "width": 84,
+      "height": 43,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 1384.0,
+      "y": 69.0,
+      "width": 630,
+      "height": 32,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 441.5,
+      "y": 308.5,
+      "width": 73,
+      "height": 37,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 385.5,
+      "y": 270.0,
+      "width": 79,
+      "height": 44,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 334.5,
+      "y": 236.0,
+      "width": 75,
+      "height": 32,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 305.0,
+      "y": 197.0,
+      "width": 154,
+      "height": 34,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 231.5,
+      "y": 157.0,
+      "width": 129,
+      "height": 50,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 181.0,
+      "y": 114.0,
+      "width": 152,
+      "height": 48,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 142.0,
+      "y": 71.5,
+      "width": 204,
+      "height": 43,
+      "floor_type": "ground",
+      "rotation": 0
+    }
+  ]
+}

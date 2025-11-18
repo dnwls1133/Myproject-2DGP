@@ -61,7 +61,7 @@ class Attack:
 
     def enter(self, e):
         self.penintent.set_animation('attack')
-        self.penintent.current_animation.set_stop_point(10)
+        #self.penintent.current_animation.set_stop_point(10)
 
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
