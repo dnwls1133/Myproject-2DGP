@@ -13,7 +13,7 @@ class Idle:
     def __init__(self, elder_brother):
         self.elder_brother = elder_brother
         self.detection_range = 600 # 전체 탐지 범위
-        self.attack_range = 300 # 공격 범위
+        self.attack_range = 400 # 공격 범위
         self.check_interval = 0.3 # AI 판단 주기
         self.check_timer = 0.0
 
@@ -154,6 +154,7 @@ class Jump:
                 self.elder_brother.vy = 0
                 self.elder_brother.vx = 0
                 self.elder_brother.is_grounded = True
+                game_framework.camera_manager.shake(10,0.5)
 
 
 
@@ -187,6 +188,7 @@ class Attack:
                 self.elder_brother.face_dir = -1
                 self.elder_brother.current_animation.set_flip('h')
 
+        self.elder_brother.apply_attack_collider_preset('elder_brother_attack')
 
 
 
@@ -201,10 +203,23 @@ class Attack:
         dt = game_framework.time_manager.get_fixed_dt()
 
         current_frame = self.elder_brother.current_animation.current_frame
-        if 16 <= current_frame <= 20:
+        if 16 <= current_frame<= 20:
+            self.elder_brother.current_animation.set_delay(0.1)
             self.elder_brother.attack_collider.active = True
-        else:
-            self.elder_brother.attack_collider.active = False
+        preset = self.elder_brother.attack_collider_presets.get('elder_brother_attack')
+        if self.elder_brother.attack_collider.active == True:
+            ox = preset['offset_x']
+            oy = preset['offset_y']
+            w = preset['width']
+            h = preset['height']
+
+            # 방향에 따라 x offset 반전
+            if self.elder_brother.face_dir == 1:
+                ox += (current_frame -16) * 40
+            else:
+                ox = -ox - (current_frame -16) * 40
+
+            self.elder_brother.attack_collider.set_offset_and_size(ox, oy, w, h)
 
         # 바닥 체크
         char_bottom = self.elder_brother.y - self.elder_brother.collider.height / 2
@@ -239,20 +254,28 @@ class Death:
 
     def enter(self, e):
 
-        self.elder_brother.vx = 0
+        game_framework.time_manager.set_
         self.elder_brother.set_animation('elder_brother_death')
         self.elder_brother.current_animation.set_delay(0.1)
         if self.elder_brother.face_dir == 1:
             self.elder_brother.current_animation.set_flip('')
+
         else:
             self.elder_brother.current_animation.set_flip('h')
+        self.elder_brother.vx = -1 * self.elder_brother.face_dir * 300
+        self.elder_brother.vy = 600
+
+        self.elder_brother.collider.active = False
 
     def exit(self, e):
         pass
 
     def do(self):
         if self.elder_brother.current_animation:
-            self.elder_brother.current_animation.update()
+            if not self.elder_brother.current_animation.is_animation_end():
+                self.elder_brother.current_animation.update()
+
+
 
         # 물리 처리
         dt = game_framework.time_manager.get_fixed_dt()
@@ -260,23 +283,25 @@ class Death:
         # 바닥 체크
         char_bottom = self.elder_brother.y - self.elder_brother.collider.height / 2
 
-        if char_bottom > self.elder_brother.ground:
-            # 공중에 있을 때 중력 적용
-            self.elder_brother.vy += self.elder_brother.gravity * dt
-            if self.elder_brother.vy < self.elder_brother.max_fall_speed:
-                self.elder_brother.vy = self.elder_brother.max_fall_speed
-            self.elder_brother.is_grounded = False
-        else:
+        self.elder_brother.vy += self.elder_brother.gravity * dt
+        if self.elder_brother.vy < self.elder_brother.max_fall_speed:
+            self.elder_brother.vy = self.elder_brother.max_fall_speed
+
+        self.elder_brother.y += self.elder_brother.vy * dt
+        self.elder_brother.x += self.elder_brother.vx * dt
+
+        if char_bottom <= self.elder_brother.ground and self.elder_brother.vy <= 0:
             # 바닥에 닿았을 때
             self.elder_brother.y = self.elder_brother.ground + self.elder_brother.collider.height / 2
             self.elder_brother.vy = 0
+            self.elder_brother.vx = 0
             self.elder_brother.is_grounded = True
 
-        # 위치 업데이트
-        self.elder_brother.y += self.elder_brother.vy * dt
+
 
     def draw(self):
         if self.elder_brother.current_animation:
+
             self.elder_brother.current_animation.draw(self.elder_brother.x, self.elder_brother.y)
 
 
@@ -291,7 +316,7 @@ class ElderBrother:
         self.attack_collider = Collider(self, offset_x=80, offset_y=0, width=60, height=170)
         self.attack_collider.active = False
 
-        self.jump_attack_collider = Collider(self, offset_x=0, offset_y=-50, width=180, height=90)
+        self.jump_attack_collider = Collider(self, offset_x=0, offset_y=-50, width=360, height=90)
         self.jump_attack_collider.active = False
 
         self.attack_collider_presets = {
@@ -341,12 +366,18 @@ class ElderBrother:
         self.state_machine = StateMachine(
             self.IDLE,{
                 self.IDLE : {events.ai_attack : self.ATTACK,
-                             events.ai_jump : self.JUMP},
-                self.JUMP: {events.animation_end : self.IDLE},
-                self.ATTACK: {events.animation_end : self.IDLE}
+                             events.ai_jump : self.JUMP,
+                             events.dead : self.DEATH},
+                self.JUMP: {events.animation_end : self.IDLE,
+                             events.dead : self.DEATH},
+                self.ATTACK: {events.animation_end : self.IDLE,
+                             events.dead : self.DEATH},
+                self.DEATH: {}
             }
         )
 
+        self.hit_flash_timer = 0.0
+        self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
     def apply_attack_collider_preset(self, ani_name):
         """공격 충돌체 프리셋 적용"""
         preset = self.attack_collider_presets.get(ani_name)
@@ -398,13 +429,22 @@ class ElderBrother:
         # 상태 머신 업데이트 - 각 상태의 do()에서 물리 처리가 실행됨
         self.state_machine.update()
 
+        if self.hit_flash_timer > 0:
+            dt = game_framework.time_manager.get_fixed_dt()
+            self.hit_flash_timer -= dt
+            if self.hit_flash_timer < 0:
+                self.hit_flash_timer = 0
+
+
     def on_collision_enter(self, group, other, collider_type):
 
         if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
             self.hp -= 10
+            self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
+            game_framework.camera_manager.shake(5,0.3)
             print(f"Elder Brother HP: {self.hp}")
             if self.hp <= 0:
-                self.state_machine.handle_state_event(('DEATH', None))
+                self.state_machine.handle_state_event(('DEAD', None))
 
     def on_collision(self, group, other, collider_type):
         """충돌 지속"""
@@ -416,7 +456,11 @@ class ElderBrother:
 
     def draw(self):
         self.state_machine.draw()
-        if self.current_animation:
+        if self.current_animation and self.hit_flash_timer > 0:
+            self.current_animation.set_color_mode(255, 100, 100)
+            self.current_animation.draw(self.x, self.y)
+        elif self.current_animation:
+            self.current_animation.reset_color_mode()
             self.current_animation.draw(self.x, self.y)
 
         self.collider.draw_debug()

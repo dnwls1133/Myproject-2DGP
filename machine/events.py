@@ -88,3 +88,5 @@ w_held = lambda e: e[0] == 'W_HELD'
 ai_attack = lambda e: e[0] == 'AI_ATTACK'
 ai_jump = lambda e: e[0] == 'AI_JUMP'
 physics_landed = lambda e: e[0] == 'PHYSICS_LANDED'
+
+dead = lambda e: e[0] == 'DEAD'

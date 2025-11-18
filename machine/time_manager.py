@@ -8,6 +8,7 @@ class TimeManager:
         """
 
         self.fixed_dt = float(fixed_dt)
+        self.time_scale = 1.0
         self.max_frame_time = float(max_frame_time)
         self.prev_time = time.time()
         self.dt = 0.0
@@ -36,9 +37,14 @@ class TimeManager:
             return True
         return False
 
+    def set_time_scale(self,scale):
+        """시간 배율을 설정합니다."""
+        self.time_scale = max(0.0,scale)
+
+
     def get_fixed_dt(self):
         """고정 업데이트 간격을 반환합니다."""
-        return self.fixed_dt
+        return self.fixed_dt * self.time_scale
 
     def get_interpolation_alpha(self):
         """보간 알파 값을 반환합니다."""

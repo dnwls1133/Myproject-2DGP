@@ -1,8 +1,8 @@
 from pico2d import *
 import json
 import game_framework
-
-
+import ctypes
+from sdl2 import SDL_SetTextureColorMod
 def register_animations(anim_manager):
     anim_manager.register_animation(
         'idle',
@@ -106,6 +106,7 @@ class AnimationManager:
         self.animations = {}
         self.images = {}
 
+
     def register_animation(self,name,json_file,image_file):
         """애니메이션을 등록합니다."""
         # JSON 데이터 로드
@@ -161,10 +162,18 @@ class Animation:
         self.frame_delay = 0.05  # 각 프레임당 지속 시간 (초)
         self.flip = ''  # 'h' for horizontal flip, '' for normal
         self.stop_point = len(self.frames) -1  # 애니메이션이 멈출 프레임 인덱스
+        self.color_mod = (255, 255, 255)  # 기본 색상 변조 (흰색, 변경 없음)
+
 
         # 애니메이션별 오프셋 (숙이기, 점프 등)
         self.offset_x = 0
         self.offset_y = 0
+
+    def set_color_mode(self,r,g,b):
+        self.color_mod = (r,g,b)
+
+    def reset_color_mode(self):
+        self.color_mod = (255,255,255)
 
     def set_delay(self,frame_delay):
         """프레임 지연 시간을 설정합니다."""
@@ -191,6 +200,10 @@ class Animation:
 
     def draw(self,x,y,scale=1):  # 2.5 대신 3으로 변경 (정수 배율)
         """애니메이션을 그립니다."""
+
+
+
+
         frame_info = self.frames[self.current_frame]
 
         # 윈도우-뷰포트 배율 계산
@@ -206,6 +219,12 @@ class Animation:
 
         # 오프셋 적용
         # 좌우 반전 시 X 오프셋 보정
+        texture = self.image.texture
+
+        r,g,b  = self.color_mod
+        SDL_SetTextureColorMod(texture, r, g, b)
+
+
         if self.flip == 'h':
             # 반전 시 offset_x를 반대로 적용
             adjusted_x = x - offset_x * scale
@@ -230,6 +249,8 @@ class Animation:
             draw_width,
             draw_height
         )
+
+        SDL_SetTextureColorMod(texture, 255, 255, 255)
 
     def set_stop_point(self, stop_point):
         """애니메이션이 멈출 프레임을 설정합니다."""
