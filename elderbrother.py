@@ -254,7 +254,7 @@ class Death:
 
     def enter(self, e):
 
-        game_framework.time_manager.set_
+        game_framework.time_manager.set_time_scale(0.5)  # 시간 느리게 설정
         self.elder_brother.set_animation('elder_brother_death')
         self.elder_brother.current_animation.set_delay(0.1)
         if self.elder_brother.face_dir == 1:
@@ -264,7 +264,7 @@ class Death:
             self.elder_brother.current_animation.set_flip('h')
         self.elder_brother.vx = -1 * self.elder_brother.face_dir * 300
         self.elder_brother.vy = 600
-
+        self.elder_brother.hit_flash_timer = 5.0
         self.elder_brother.collider.active = False
 
     def exit(self, e):
@@ -274,6 +274,8 @@ class Death:
         if self.elder_brother.current_animation:
             if not self.elder_brother.current_animation.is_animation_end():
                 self.elder_brother.current_animation.update()
+            else:
+                game_framework.time_manager.set_time_scale(1.0)
 
 
 
