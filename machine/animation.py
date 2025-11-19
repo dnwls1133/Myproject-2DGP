@@ -99,6 +99,16 @@ def register_animations(anim_manager):
         "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.json",
         "sprites/elderbrother/texture2d/elder_brother_jump/elder_brother_jump_anim.png"
     )
+    anim_manager.register_animation(
+        'main_menu_background',
+        "sprites/main_menu/texture2d/UI/crisanta-bg-main-menu_anim.json",
+        "sprites/main_menu/texture2d/UI/crisanta-bg-main-menu_anim.png"
+    )
+    anim_manager.register_animation(
+        'main_menu_crisanta',
+        "sprites/main_menu/texture2d/UI/crisanta-main-menu_anim.json",
+        "sprites/main_menu/texture2d/UI/crisanta-main-menu_anim.png"
+    )
 
 
 class AnimationManager:
