@@ -16,7 +16,7 @@ from tilemap import TileMap
 # 애니메이션 매니저 초기화
 anim_manager = None
 floor_manager = None
-
+bgm = None
 
 
 
@@ -27,7 +27,12 @@ def handle_events():
 
 
 def init():
-    global anim_manager, floor_manager
+
+
+
+    global anim_manager, floor_manager,bgm
+
+    bgm = load_music('music\Dame_Tu_Tormento.mp3')
     game_framework.camera_manager.set_world_size(1350,1000)
     game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
@@ -116,6 +121,9 @@ def init():
     #
     # print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
 
+    bgm.repeat_play()
+
+    bgm.set_volume(64)
 
 
 def update():
@@ -146,8 +154,12 @@ def draw():
     update_canvas()
 
 def finish():
+    global bgm
     game_world.clear()
     machine.collider_manager.clear_collision_pairs()
+    if bgm:
+        bgm.stop()
+
 def pause():
     pass
 

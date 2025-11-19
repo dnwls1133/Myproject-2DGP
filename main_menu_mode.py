@@ -4,14 +4,10 @@ from machine.animation import AnimationManager
 from machine.animation import register_animations
 import game_world
 import game_framework
-import machine.collider_manager
-from penintent import Penintent
-from elderbrother import ElderBrother
-from brotherhood_background_0 import BrotherhoodBackground0
-from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles
-from floor_object import FloorManager, FloorObject
+from Obj.UI.crisanta_bg import CrisantaBg
+from Obj.UI.crisanta import Crisanta
 
-from tilemap import TileMap
+import play_mode
 
 # 애니메이션 매니저 초기화
 anim_manager = None
@@ -42,8 +38,12 @@ def init():
     except Exception as e:
         print(f"애니메이션 등록 실패: {e}")
 
+    # 크리산타 배경 객체 생성 및 추가
+    crisanta_bg = CrisantaBg(anim_manager)
+    game_world.add_object(crisanta_bg, 0)
 
-
+    crisanta = Crisanta(anim_manager)
+    game_world.add_object(crisanta, 1)
 
 
 
@@ -59,8 +59,8 @@ def update():
         game_framework.camera_manager.move(0, -camera_speed)
     if game_framework.key_manager.is_down(SDLK_p):
         game_framework.camera_manager.shake(10,0.5)
-    if game_framework.key_manager.is_down(SDLK_ESCAPE):
-        game_framework.quit()
+    if game_framework.key_manager.is_down(SDLK_SPACE):
+        game_framework.change_mode(play_mode)
 
     game_world.update()
 

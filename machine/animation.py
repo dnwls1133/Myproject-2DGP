@@ -101,13 +101,13 @@ def register_animations(anim_manager):
     )
     anim_manager.register_animation(
         'main_menu_background',
-        "sprites/main_menu/texture2d/UI/crisanta-bg-main-menu_anim.json",
-        "sprites/main_menu/texture2d/UI/crisanta-bg-main-menu_anim.png"
+        "sprites/UI/crisanta_bg_main_menu_anim.json",
+        "sprites/UI/crisanta_bg_main_menu_anim.png"
     )
     anim_manager.register_animation(
         'main_menu_crisanta',
-        "sprites/main_menu/texture2d/UI/crisanta-main-menu_anim.json",
-        "sprites/main_menu/texture2d/UI/crisanta-main-menu_anim.png"
+        "sprites/UI/crisanta_main_menu_anim.json",
+        "sprites/UI/crisanta_main_menu_anim.png"
     )
 
 

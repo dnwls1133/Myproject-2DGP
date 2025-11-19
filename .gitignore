@@ -6,6 +6,9 @@
 # Sprites folder - contains large image files
 sprites/
 
+# 음악 파일 제외
+music/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/

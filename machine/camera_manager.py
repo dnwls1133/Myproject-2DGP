@@ -202,3 +202,7 @@ class CameraManager:
 
         self.target_x = x
         self.target_y = y
+
+    def get_window_size(self):
+        """카메라 윈도우 크기를 반환합니다."""
+        return self.window_width, self.window_height
