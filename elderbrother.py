@@ -206,6 +206,9 @@ class Attack:
         if 16 <= current_frame<= 20:
             self.elder_brother.current_animation.set_delay(0.1)
             self.elder_brother.attack_collider.active = True
+            if current_frame ==16:
+                game_framework.camera_manager.shake(10, 0.7)
+
         preset = self.elder_brother.attack_collider_presets.get('elder_brother_attack')
         if self.elder_brother.attack_collider.active == True:
             ox = preset['offset_x']

@@ -472,7 +472,7 @@ class Falling_Over:
         self.penintent = penintent
 
     def enter(self, e):
-        self.penintent.set_animation('idle')
+        self.penintent.set_animation('falling_over')
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
         else:
@@ -483,7 +483,27 @@ class Falling_Over:
 
     def do(self):
         if self.penintent.current_animation:
-            self.penintent.current_animation.update()
+            if not self.penintent.current_animation.is_animation_end():
+                self.penintent.current_animation.update()
+
+
+        dt = game_framework.time_manager.get_fixed_dt()
+            # 물리 처리
+        char_bottom = self.penintent.y - self.penintent.collider.height / 2
+        if char_bottom > self.penintent.ground:
+            # 공중에 있을 때 중력 적용
+            self.penintent.vy += self.penintent.gravity * dt
+            if self.penintent.vy < self.penintent.max_fall_speed:
+                self.penintent.vy = self.penintent.max_fall_speed
+            self.penintent.is_grounded = False
+        else:
+            # 바닥에 닿았을 때
+            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
+            self.penintent.vy = 0
+            self.penintent.is_grounded = True
+        # 위치 업데이트
+        self.penintent.x += self.penintent.vx * dt
+        self.penintent.y += self.penintent.vy * dt
 
     def draw(self):
         if self.penintent.current_animation:
@@ -763,6 +783,12 @@ class Penintent:
             'getting_up', 'parry_failed', 'parry_success',
             'jump', 'jump_off', 'jump_front'
         ]
+        # 히트 타이머
+        self.hit_flash_timer = 0.0
+        self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
+
+        # 캐릭터 속성
+        self.hp = 100
 
         self.x, self.y = 400,500
         self.face_dir = 1
@@ -816,45 +842,50 @@ class Penintent:
             {
                 self.IDLE: {events.a_down: self.START_RUN, events.d_down: self.START_RUN, events.a_up: self.START_RUN, events.d_up: self.START_RUN,
                             events.s_down: self.CROUCH, events.space_down: self.JUMP, events.k_down: self.ATTACK,
-                             events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED},
+                             events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER},
                 self.START_RUN: {events.animation_end: self.RUN, events.s_down: self.CROUCH, events.space_down: self.JUMP,
                                  events.k_down: self.ATTACK,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN,
                                  events.a_down: self.STOP_RUN, events.d_down:self.STOP_RUN,events.shift_down : self.DODGE,
-                                 events.j_down: self.PARRY_FAILED},
+                                 events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER},
                 self.RUN: {events.space_down: self.JUMP , events.a_up : self.STOP_RUN, events.d_up: self.STOP_RUN,
                            events.s_down: self.CROUCH, events.a_down: self.STOP_RUN, events.d_down: self.STOP_RUN,
-                           events.k_down: self.ATTACK,events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED},
+                           events.k_down: self.ATTACK,events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED
+                          ,events.dead : self.FALLING_OVER},
                 self.STOP_RUN: {events.animation_end: self.IDLE, events.s_down: self.CROUCH,
                                 events.a_down: self.START_RUN, events.d_down: self.START_RUN,
-                                events.a_up: self.START_RUN, events.d_up: self.START_RUN
+                                events.a_up: self.START_RUN, events.d_up: self.START_RUN,events.dead : self.FALLING_OVER
                                 },
                 self.ATTACK: {events.all_keys_up: self.IDLE,
                 events.a_held: self.START_RUN,
-                events.d_held: self.START_RUN},
+                events.d_held: self.START_RUN,events.dead : self.FALLING_OVER},
                 self.CROUCH: {events.s_up: self.CROUCH_UP,events.shift_down : self.DODGE,
-                              events.j_down: self.PARRY_FAILED},
+                              events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER},
                 self.CROUCH_UP: {events.animation_end: self.IDLE,
                                  events.all_keys_up: self.IDLE,
                                  events.a_held: self.START_RUN,
-                                 events.d_held: self.START_RUN
+                                 events.d_held: self.START_RUN,events.dead : self.FALLING_OVER
                                  },
                 self.JUMP: {events.animation_end: self.IDLE,
                             events.a_held: self.START_RUN,
-                            events.d_held: self.START_RUN
+                            events.d_held: self.START_RUN,events.dead : self.FALLING_OVER
                             },
                 self.DODGE: {events.animation_end: self.IDLE,
                     events.a_held: self.START_RUN,
                     events.d_held: self.START_RUN,
                     events.s_held: self.CROUCH,
                     events.all_keys_up: self.IDLE,
-                    events.j_down: self.PARRY_FAILED
+                    events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER
                 },
                 self.PARRY_FAILED: {events.animation_end: self.IDLE,
                                     events.a_held: self.START_RUN,
                                     events.d_held: self.START_RUN,
                                     events.s_held: self.CROUCH,
-                                    events.all_keys_up: self.IDLE
-                                    }
+                                    events.all_keys_up: self.IDLE,events.dead : self.FALLING_OVER
+                                    },
+                self.FALLING_OVER : {
+
+                }
+
             }
         )
 
@@ -964,11 +995,21 @@ class Penintent:
         # 상태 머신 업데이트 - 각 상태의 do()에서 물리 처리가 실행됨
         self.state_machine.update()
 
+        if self.hit_flash_timer > 0:
+            dt = game_framework.time_manager.get_fixed_dt()
+            self.hit_flash_timer -= dt
+            if self.hit_flash_timer < 0:
+                self.hit_flash_timer = 0
+
 
     def on_collision_enter(self, group, other,collider_type):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
         if group == 'elderBrother_attack:player' and collider_type == 'base':
-            print("플레이어 피격!")
+            self.hp -= 10
+            self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
+            if self.hp <= 0:
+                self.state_machine.handle_state_event(("DEAD",None))
+
         pass
 
     def on_collision(self, group, other, collider_type):
@@ -988,8 +1029,13 @@ class Penintent:
 
     def draw(self):
         self.state_machine.draw()
-        if self.current_animation:
+        if self.current_animation and self.hit_flash_timer > 0:
+            self.current_animation.set_color_mode(255,100,100)
             self.current_animation.draw(self.x, self.y)
+        elif self.current_animation:
+            self.current_animation.reset_color_mode()
+            self.current_animation.draw(self.x, self.y)
+
 
         self.collider.draw_debug()
         if self.attack_collider.active:
