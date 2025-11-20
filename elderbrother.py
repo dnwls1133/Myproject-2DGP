@@ -1,22 +1,47 @@
 import game_framework
+from pico2d import *
 from machine.animation import Animation
 from machine.state_machine import StateMachine
 from sdl2 import *
 from machine import events
 from collider import Collider
+import game_world
 import math
 import random
 
+jump_voice_sound = None
+jump_sound = None
+landing_sound = None
+
+attack_sound = None
+attack_hit_sound = None
+attack_voice_sound = None
+
+def load_sounds():
+    global jump_voice_sound, jump_sound, landing_sound,attack_sound,attack_hit_sound,attack_voice_sound
+    if jump_voice_sound is None:
+        jump_voice_sound = load_wav('music/SFX/ELDER_BROTHER_JUMP_VOICE.wav')
+        jump_sound = load_wav('music/SFX/ELDER_BROTHER_JUMP.wav')
+        landing_sound = load_wav('music/SFX/ELDER_BROTHER_LANDING.wav')
+
+    if attack_sound is None:
+        attack_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK.wav')
+        attack_hit_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK_HIT.wav')
+        attack_voice_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK_VOICE.wav')
 
 
 class Idle:
     def __init__(self, elder_brother):
         self.elder_brother = elder_brother
-        self.detection_range = 600 # 전체 탐지 범위
-        self.attack_range = 400 # 공격 범위
-        self.check_interval = 0.3 # AI 판단 주기
+
+        self.check_interval = 0.3
         self.check_timer = 0.0
 
+    def get_detection_range(self):
+        return 200 if self.elder_brother.is_opening else 600
+
+    def get_attack_range(self):
+        return 100 if self.elder_brother.is_opening else 400
 
     def enter(self, e):
 
@@ -64,9 +89,9 @@ class Idle:
             player = self.elder_brother.get_player()
             if player:
                 distance = abs(self.elder_brother.x - player.x)
-                if distance <= self.attack_range:
+                if distance <= self.get_attack_range():
                     self.elder_brother.state_machine.handle_state_event(('AI_ATTACK',None))
-                elif distance <= self.detection_range:
+                elif distance <= self.get_detection_range():
                     self.elder_brother.state_machine.handle_state_event(('AI_JUMP',None))
 
             self.check_timer = 0.0
@@ -113,10 +138,17 @@ class Jump:
                 self.elder_brother.face_dir = -1
                 self.elder_brother.current_animation.set_flip('h')
 
+        jump_voice_sound.set_volume(64)
+        jump_voice_sound.play()
+
+        jump_sound.set_volume(64)
+        jump_sound.play()
+
 
 
 
     def exit(self, e):
+
         pass
 
     def do(self):
@@ -156,6 +188,13 @@ class Jump:
                 self.elder_brother.is_grounded = True
                 game_framework.camera_manager.shake(10,0.5)
 
+                landing_sound.set_volume(64)
+                landing_sound.play()
+
+        if self.elder_brother.y >= self.max_jump_height and self.elder_brother.is_opening:
+            self.elder_brother.is_opening = False
+            self.elder_brother.ground = 100
+            game_world.change_depth(self.elder_brother,3)
 
 
 
@@ -189,7 +228,8 @@ class Attack:
                 self.elder_brother.current_animation.set_flip('h')
 
         self.elder_brother.apply_attack_collider_preset('elder_brother_attack')
-
+        attack_voice_sound.set_volume(64)
+        attack_voice_sound.play()
 
 
     def exit(self, e):
@@ -208,6 +248,8 @@ class Attack:
             self.elder_brother.attack_collider.active = True
             if current_frame ==16:
                 game_framework.camera_manager.shake(10, 0.7)
+                attack_sound.set_volume(64)
+                attack_sound.play()
 
         preset = self.elder_brother.attack_collider_presets.get('elder_brother_attack')
         if self.elder_brother.attack_collider.active == True:
@@ -315,7 +357,7 @@ class Death:
 
 class ElderBrother:
     def __init__(self,anim_manager):
-
+        load_sounds()
         self.collider = Collider(self, offset_x=0, offset_y=0, width=159, height=171)
 
         self.attack_collider = Collider(self, offset_x=80, offset_y=0, width=60, height=170)
@@ -333,14 +375,14 @@ class ElderBrother:
                       'elder_brother_jump',
                       'elder_brother_death']
         self.hp = 100
-        self.x, self.y = 800, 500
+        self.x, self.y = 1300, 300
         self.face_dir = -1
         # 물리 속성
         self.vx = 0
         self.vy = 0
 
         self.on_ground = False
-        self.ground = 100
+        self.ground = 200
         # 물리 상수
         self.gravity = -1233.0  # 중력 가속도
         self.max_fall_speed = -1000.0  # 최대 낙하 속도
@@ -349,6 +391,8 @@ class ElderBrother:
         # 이동 상수
         self.move_speed = 250.0  # 이동 속도
         self.jump_speed = 600.0  # 점프 속도
+
+        self.is_opening = True
 
         # 딕셔너리로 애니메이션 관리
         self.animations = {}
@@ -461,12 +505,18 @@ class ElderBrother:
 
     def draw(self):
         self.state_machine.draw()
-        if self.current_animation and self.hit_flash_timer > 0:
-            self.current_animation.set_color_mode(255, 100, 100)
+
+        if self.is_opening:
+            self.current_animation.set_color_mode(50, 50, 50)
             self.current_animation.draw(self.x, self.y)
-        elif self.current_animation:
-            self.current_animation.reset_color_mode()
-            self.current_animation.draw(self.x, self.y)
+        else:
+            if self.current_animation and self.hit_flash_timer > 0:
+                self.current_animation.set_color_mode(255, 100, 100)
+                self.current_animation.draw(self.x, self.y)
+            elif self.current_animation:
+                self.current_animation.reset_color_mode()
+                self.current_animation.draw(self.x, self.y)
+
 
         self.collider.draw_debug()
 

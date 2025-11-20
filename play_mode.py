@@ -33,7 +33,7 @@ def init():
     global anim_manager, floor_manager,bgm
 
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
-    game_framework.camera_manager.set_world_size(1350,1000)
+    game_framework.camera_manager.set_world_size(1800,1000)
     game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
@@ -87,6 +87,10 @@ def init():
 
     game_world.add_object(floor_manager, 2)
 
+    elderbrother = ElderBrother(anim_manager)
+    game_world.add_object(elderbrother, 0)
+    print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
+
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
     penintent = Penintent(anim_manager)
     # 플레이어에게 타일맵 참조 전달
@@ -95,9 +99,9 @@ def init():
     game_world.add_object(penintent, 3)
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
-    elderbrother = ElderBrother(anim_manager)
-    game_world.add_object(elderbrother, 3)
-    print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
+
+
+
 
     # 충돌 페어 등록 : 플레이어 공격 -> 엘더 형님 본체
     machine.collider_manager.add_collision_pair(
