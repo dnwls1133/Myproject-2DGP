@@ -4,7 +4,7 @@ from machine.state_machine import StateMachine
 from sdl2 import *
 from machine import events
 from collider import Collider
-
+import main_menu_mode
 
 
 
@@ -477,14 +477,18 @@ class Falling_Over:
             self.penintent.current_animation.set_flip('')
         else:
             self.penintent.current_animation.set_flip('h')
+        self.penintent.ground = -5
 
     def exit(self, e):
+
         pass
 
     def do(self):
         if self.penintent.current_animation:
             if not self.penintent.current_animation.is_animation_end():
                 self.penintent.current_animation.update()
+            else:
+                game_framework.change_mode(main_menu_mode)
 
 
         dt = game_framework.time_manager.get_fixed_dt()
