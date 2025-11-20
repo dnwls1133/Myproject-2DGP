@@ -12,7 +12,7 @@ import play_mode
 # 애니메이션 매니저 초기화
 anim_manager = None
 floor_manager = None
-
+bgm = None
 
 
 
@@ -23,11 +23,11 @@ def handle_events():
 
 
 def init():
-    global anim_manager, floor_manager
+    global anim_manager, floor_manager,bgm
 
     game_framework.camera_manager.set_zoom(1.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
 
-
+    bgm = load_music('music\Tierras_de_Azafrán.mp3')
     anim_manager = AnimationManager()
 
 
@@ -45,7 +45,8 @@ def init():
     crisanta = Crisanta(anim_manager)
     game_world.add_object(crisanta, 1)
 
-
+    bgm.repeat_play()
+    bgm.set_volume(64)
 
 def update():
     camera_speed = 5
@@ -76,7 +77,8 @@ def draw():
 
 def finish():
     game_world.clear()
-
+    if bgm:
+        bgm.stop()
 def pause():
     pass
 
