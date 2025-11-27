@@ -85,8 +85,20 @@ class Attack:
 
             # 공격 판정 프레임 구간 설정 (예: 3~7 프레임)
             current_frame = self.penintent.current_animation.current_frame
+            if current_frame == 3:
+                # 이펙트 생성
+                effect_x = self.penintent.x + (30 * self.penintent.face_dir)
+                effect_y = self.penintent.y + 10
+                if self.penintent.face_dir == 1:
+                    self.penintent.create_effects('three_hit_slash', effect_x, effect_y,0.05,1.5,'')
+                else:
+                    self.penintent.create_effects('three_hit_slash', effect_x, effect_y,0.05,1.5,'h')
+
+
             if 3 <= current_frame <= 7:
                 self.penintent.attack_collider.active = True
+
+
             else:
                 self.penintent.attack_collider.active = False
 
@@ -754,7 +766,7 @@ class Jump:
 class Penintent:
     def __init__(self, anim_manager):
         game_framework.camera_manager.set_target(self)
-
+        self.anim_manager = anim_manager
         self.collider = Collider(self, offset_x=0, offset_y=0, width=40, height=90)
 
         # 공격 충돌체 (기본적으로 비활성화)
@@ -895,6 +907,23 @@ class Penintent:
 
         self.is_grounded = False  # 땅에 닿아있는지 여부
 
+
+    def create_effects(self, anim_name,x,y,delay=0.05,scale=1.5,flip=''):
+        from Obj.effect import Effect
+        import game_world
+
+
+
+        hit_effect = Effect(
+            x,
+            y,
+            anim_name,
+            self.anim_manager,
+            delay=delay,
+            scale=scale,
+            flip=flip
+        )
+        game_world.add_object(hit_effect,4) # 이펙트를 적절한 레이어에 추가
 
     def apply_attack_collider_preset(self, ani_name):
         """공격 충돌체 프리셋 적용"""

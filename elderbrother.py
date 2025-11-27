@@ -358,6 +358,7 @@ class Death:
 class ElderBrother:
     def __init__(self,anim_manager):
         load_sounds()
+        self.anim_manager = anim_manager
         self.collider = Collider(self, offset_x=0, offset_y=0, width=159, height=171)
 
         self.attack_collider = Collider(self, offset_x=80, offset_y=0, width=60, height=170)
@@ -427,6 +428,25 @@ class ElderBrother:
 
         self.hit_flash_timer = 0.0
         self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
+
+    def create_effects(self, anim_name,x,y,delay=0.05,scale=1.5,flip=''):
+        from Obj.effect import Effect
+        import game_world
+
+
+
+        hit_effect = Effect(
+            x,
+            y,
+            anim_name,
+            self.anim_manager,
+            delay=delay,
+            scale=scale,
+            flip=flip
+        )
+        game_world.add_object(hit_effect,4) # 이펙트를 적절한 레이어에 추가
+
+
     def apply_attack_collider_preset(self, ani_name):
         """공격 충돌체 프리셋 적용"""
         preset = self.attack_collider_presets.get(ani_name)

@@ -109,6 +109,27 @@ def register_animations(anim_manager):
         "sprites/UI/crisanta_main_menu_anim.json",
         "sprites/UI/crisanta_main_menu_anim.png"
     )
+    anim_manager.register_animation(
+        'three_hit_slash',
+        "sprites/Effect/attack_effect/three_hit_slash_anim.json",
+        "sprites/Effect/attack_effect/three_hit_slash_anim.png"
+    )
+    anim_manager.register_animation(
+        'penitent_attack_spark1',
+        "sprites/Effect/attack_effect/penitent_attack_spark1_anim.json",
+        "sprites/Effect/attack_effect/penitent_attack_spark1_anim.png"
+    )
+    anim_manager.register_animation(
+        'penitent_attack_spark2',
+        "sprites/Effect/attack_effect/penitent_attack_spark2_anim.json",
+        "sprites/Effect/attack_effect/penitent_attack_spark2_anim.png"
+    )
+    anim_manager.register_animation(
+        'penitent_attack_spark3',
+        "sprites/Effect/attack_effect/penitent_attack_spark3_anim.json",
+        "sprites/Effect/attack_effect/penitent_attack_spark3_anim.png"
+    )
+
 
 
 class AnimationManager:

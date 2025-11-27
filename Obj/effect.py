@@ -3,17 +3,18 @@ import game_framework
 import game_world
 
 class Effect:
-    def __init__(self,x,y,animation_name,anim_manager,delay=0.1,scale=1.0):
+    def __init__(self,x,y,animation_name,anim_manager,delay=0.1,scale=1.0,flip = ''):
         self.x = x
         self.y = y
         self.scale = scale
+        self.flip = flip
 
         # 애니메이션 로드
-        anim_data = anim_manager.get_anim_data(animation_name)
+        anim_data = anim_manager.get_animation(animation_name)
         from machine.animation import Animation
         self.animation = Animation(anim_data)
         self.animation.set_delay(delay)
-
+        self.animation.set_flip(flip)
         self.is_finished = False
 
 
