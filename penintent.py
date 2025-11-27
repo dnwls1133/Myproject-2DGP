@@ -1010,6 +1010,7 @@ class Penintent:
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
         if group == 'elderBrother_attack:player' and collider_type == 'base':
             self.hp -= 10
+            self.vx = -20 * self.face_dir
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             if self.hp <= 0:
                 self.state_machine.handle_state_event(("DEAD",None))
