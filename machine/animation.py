@@ -129,6 +129,22 @@ def register_animations(anim_manager):
         "sprites/Effect/attack_effect/penitent_attack_spark3_anim.json",
         "sprites/Effect/attack_effect/penitent_attack_spark3_anim.png"
     )
+    anim_manager.register_animation(
+        'elder_brother_corpse',
+        "sprites/Effect/elderbrother_effect/elderBrother_corpse_anim.json",
+        "sprites/Effect/elderbrother_effect/elderBrother_corpse_anim.png"
+    )
+    anim_manager.register_animation(
+        'elder_brother_beam',
+        "sprites/Effect/elderbrother_effect/elderbrother_beam_anim.json",
+        "sprites/Effect/elderbrother_effect/elderbrother_beam_anim.png"
+    )
+    anim_manager.register_animation(
+        'elder_brother_hardlanding',
+        "sprites/Effect/elderbrother_effect/elderBrother_hardlanding_anim.json",
+        "sprites/Effect/elderbrother_effect/elderBrother_hardlanding_anim.png"
+    )
+
 
 
 

@@ -16,9 +16,11 @@ landing_sound = None
 attack_sound = None
 attack_hit_sound = None
 attack_voice_sound = None
+attack_damaged_sound = None
+
 
 def load_sounds():
-    global jump_voice_sound, jump_sound, landing_sound,attack_sound,attack_hit_sound,attack_voice_sound
+    global jump_voice_sound, jump_sound, landing_sound,attack_sound,attack_hit_sound,attack_voice_sound,attack_damaged_sound
     if jump_voice_sound is None:
         jump_voice_sound = load_wav('music/SFX/ELDER_BROTHER_JUMP_VOICE.wav')
         jump_sound = load_wav('music/SFX/ELDER_BROTHER_JUMP.wav')
@@ -28,6 +30,9 @@ def load_sounds():
         attack_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK.wav')
         attack_hit_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK_HIT.wav')
         attack_voice_sound = load_wav('music/SFX/ELDER_BROTHER_ATTACK_VOICE.wav')
+        attack_damaged_sound = load_wav('music/SFX/PENITENT_HEAVY_ENEMY_HIT.wav')
+
+
 
 
 class Idle:
@@ -188,6 +193,14 @@ class Jump:
                 self.elder_brother.is_grounded = True
                 game_framework.camera_manager.shake(10,0.5)
 
+                self.elder_brother.create_effects(
+                    'elder_brother_corpse',
+                    self.elder_brother.x + random.randint(-200, 200),
+                    self.elder_brother.y - 75,
+                    delay=0.05,
+                    scale=1.0,
+                    flip='' if self.elder_brother.face_dir == 1 else 'h'
+                )
                 landing_sound.set_volume(64)
                 landing_sound.play()
 
@@ -248,8 +261,19 @@ class Attack:
             self.elder_brother.attack_collider.active = True
             if current_frame ==16:
                 game_framework.camera_manager.shake(10, 0.7)
+                self.elder_brother.create_effects(
+                    'elder_brother_hardlanding',
+                    self.elder_brother.x,
+                    self.elder_brother.y - 75,
+
+                    delay=0.05,
+                    scale=2.0,
+                    flip='' if self.elder_brother.face_dir == 1 else 'h'
+                )
                 attack_sound.set_volume(64)
                 attack_sound.play()
+
+
 
         preset = self.elder_brother.attack_collider_presets.get('elder_brother_attack')
         if self.elder_brother.attack_collider.active == True:
@@ -261,8 +285,27 @@ class Attack:
             # 방향에 따라 x offset 반전
             if self.elder_brother.face_dir == 1:
                 ox += (current_frame -16) * 40
+
             else:
                 ox = -ox - (current_frame -16) * 40
+            if current_frame % 2 == 0:
+                self.elder_brother.create_effects(
+                    'elder_brother_beam',
+                    self.elder_brother.x + ox,
+                    self.elder_brother.y - 75,
+                    delay=0.05,
+                    scale=1.0,
+                    flip='' if self.elder_brother.face_dir == 1 else 'h'
+                )
+                for i in range(3):
+                    self.elder_brother.create_effects(
+                        'elder_brother_corpse',
+                        self.elder_brother.x + ox + random.randint(-30, 30),
+                        self.elder_brother.y - 20 + random.randint(-20, 80),
+                        delay=0.05,
+                        scale=1.0,
+                        flip='' if self.elder_brother.face_dir == 1 else 'h'
+                    )
 
             self.elder_brother.attack_collider.set_offset_and_size(ox, oy, w, h)
 
@@ -506,11 +549,23 @@ class ElderBrother:
 
 
     def on_collision_enter(self, group, other, collider_type):
-
+        global attack_damaged_sound
         if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
             self.hp -= 10
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             game_framework.camera_manager.shake(5,0.3)
+            effect_x = self.x
+            effect_y = self.y
+            self.create_effects(
+                'penitent_attack_spark1',
+                effect_x,
+                effect_y,
+                delay=0.05,
+                scale=1.5,
+                flip='' if self.face_dir == 1 else 'h'
+            )
+            attack_damaged_sound.set_volume(64)
+            attack_damaged_sound.play()
             print(f"Elder Brother HP: {self.hp}")
             if self.hp <= 0:
                 self.state_machine.handle_state_event(('DEAD', None))
