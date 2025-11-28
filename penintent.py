@@ -1063,16 +1063,15 @@ class Penintent:
 
     def draw(self):
         self.state_machine.draw()
-        if self.current_animation and self.hit_flash_timer > 0:
-            self.current_animation.set_color_mode(255,255,255)
-            self.current_animation.draw(self.x, self.y)
+        self.state_machine.draw()
 
-            # 추가 밝기 효과를 위해 반투명 흰색 덧그리기
-            self.current_animation.draw(self.x, self.y)
-        elif self.current_animation:
-            self.current_animation.reset_color_mode()
-            self.current_animation.draw(self.x, self.y)
-
+        if self.current_animation:
+            if self.hit_flash_timer > 0:
+                self.current_animation.set_color_mode(255,100,100)  # 밝은 빨간색으로 설정
+                self.current_animation.draw(self.x, self.y)  # 2번 그려서 더 밝게
+            else:
+                self.current_animation.reset_color_mode()
+                self.current_animation.draw(self.x, self.y)
 
         self.collider.draw_debug()
         if self.attack_collider.active:

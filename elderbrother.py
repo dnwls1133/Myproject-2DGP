@@ -191,8 +191,16 @@ class Jump:
                 self.elder_brother.vy = 0
                 self.elder_brother.vx = 0
                 self.elder_brother.is_grounded = True
-                game_framework.camera_manager.shake(10,0.5)
+                game_framework.camera_manager.shake(5,0.5)
+                self.elder_brother.create_effects(
+                    'elder_brother_hardlanding',
+                    self.elder_brother.x,
+                    self.elder_brother.y - 75,
 
+                    delay=0.05,
+                    scale=2.0,
+                    flip='' if self.elder_brother.face_dir == 1 else 'h'
+                )
                 self.elder_brother.create_effects(
                     'elder_brother_corpse',
                     self.elder_brother.x + random.randint(-200, 200),
@@ -260,7 +268,7 @@ class Attack:
             self.elder_brother.current_animation.set_delay(0.1)
             self.elder_brother.attack_collider.active = True
             if current_frame ==16:
-                game_framework.camera_manager.shake(10, 0.7)
+                game_framework.camera_manager.shake(5, 0.5)
                 self.elder_brother.create_effects(
                     'elder_brother_hardlanding',
                     self.elder_brother.x,
@@ -551,7 +559,7 @@ class ElderBrother:
     def on_collision_enter(self, group, other, collider_type):
         global attack_damaged_sound
         if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
-            self.hp -= 10
+            self.hp -= 0.5
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             game_framework.camera_manager.shake(5,0.3)
             effect_x = self.x

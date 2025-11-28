@@ -212,16 +212,25 @@ class Animation:
         self.stop_point = len(self.frames) -1  # 애니메이션이 멈출 프레임 인덱스
         self.color_mod = (255, 255, 255)  # 기본 색상 변조 (흰색, 변경 없음)
         self.blend_mode = None
+        self.white_flash = False
 
         # 애니메이션별 오프셋 (숙이기, 점프 등)
         self.offset_x = 0
         self.offset_y = 0
 
+    def set_blend_mode(self, mode):
+        self.blend_mode = mode
+
     def set_color_mode(self,r,g,b):
         self.color_mod = (r,g,b)
+        self.white_flash = False
+
+    def set_white_flash(self):
+        self.white_flash = True
 
     def reset_color_mode(self):
         self.color_mod = (255,255,255)
+        self.white_flash = False
 
     def set_delay(self,frame_delay):
         """프레임 지연 시간을 설정합니다."""
@@ -269,36 +278,72 @@ class Animation:
         # 좌우 반전 시 X 오프셋 보정
         texture = self.image.texture
 
-        r,g,b  = self.color_mod
-        SDL_SetTextureColorMod(texture, r, g, b)
+        if self.white_flash:
+            # ✅ 투명도 유지 + 흰색 플래시
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND)
+            SDL_SetTextureColorMod(texture, 255, 255, 255)
+            SDL_SetTextureAlphaMod(texture, 255)
+            if self.flip == 'h':
+                # 반전 시 offset_x를 반대로 적용
+                adjusted_x = x - offset_x * scale
+            else:
+                adjusted_x = x + offset_x * scale
 
+            adjusted_y = y + offset_y * scale
 
-        if self.flip == 'h':
-            # 반전 시 offset_x를 반대로 적용
-            adjusted_x = x - offset_x * scale
+            screen_x, screen_y = game_framework.camera_manager.world_to_screen(
+                adjusted_x, adjusted_y
+            )
+
+            self.image.clip_composite_draw(
+                frame_info['x'],
+                self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],
+                frame_info['width'],
+                frame_info['height'],
+                0,  # 회전 각도
+                self.flip,  # 'h' 또는 ''
+                screen_x,
+                screen_y,
+                draw_width,
+                draw_height
+            )
+
         else:
-            adjusted_x = x + offset_x * scale
+            r, g, b = self.color_mod
 
-        adjusted_y = y + offset_y * scale
 
-        screen_x , screen_y = game_framework.camera_manager.world_to_screen(
-            adjusted_x, adjusted_y
-        )
+            SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND)
+            SDL_SetTextureColorMod(texture, r, g, b)
 
-        self.image.clip_composite_draw(
-            frame_info['x'],
-            self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],
-            frame_info['width'],
-            frame_info['height'],
-            0,  # 회전 각도
-            self.flip,  # 'h' 또는 ''
-            screen_x,
-            screen_y,
-            draw_width,
-            draw_height
-        )
+            if self.flip == 'h':
+                # 반전 시 offset_x를 반대로 적용
+                adjusted_x = x - offset_x * scale
+            else:
+                adjusted_x = x + offset_x * scale
+
+            adjusted_y = y + offset_y * scale
+
+            screen_x, screen_y = game_framework.camera_manager.world_to_screen(
+                adjusted_x, adjusted_y
+            )
+
+            self.image.clip_composite_draw(
+                frame_info['x'],
+                self.data['spriteSheetHeight'] - frame_info['y'] - frame_info['height'],
+                frame_info['width'],
+                frame_info['height'],
+                0,  # 회전 각도
+                self.flip,  # 'h' 또는 ''
+                screen_x,
+                screen_y,
+                draw_width,
+                draw_height
+            )
+
+
 
         SDL_SetTextureColorMod(texture, 255, 255, 255)
+        SDL_SetTextureAlphaMod(texture, 255)
 
     def set_stop_point(self, stop_point):
         """애니메이션이 멈출 프레임을 설정합니다."""
