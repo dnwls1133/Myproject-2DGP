@@ -2,7 +2,8 @@ from pico2d import *
 import json
 import game_framework
 import ctypes
-from sdl2 import SDL_SetTextureColorMod
+from sdl2 import SDL_SetTextureColorMod, SDL_SetTextureBlendMode, SDL_BLENDMODE_ADD
+
 def register_animations(anim_manager):
     anim_manager.register_animation(
         'idle',
@@ -210,7 +211,7 @@ class Animation:
         self.flip = ''  # 'h' for horizontal flip, '' for normal
         self.stop_point = len(self.frames) -1  # 애니메이션이 멈출 프레임 인덱스
         self.color_mod = (255, 255, 255)  # 기본 색상 변조 (흰색, 변경 없음)
-
+        self.blend_mode = None
 
         # 애니메이션별 오프셋 (숙이기, 점프 등)
         self.offset_x = 0
