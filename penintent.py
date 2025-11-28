@@ -1064,7 +1064,10 @@ class Penintent:
     def draw(self):
         self.state_machine.draw()
         if self.current_animation and self.hit_flash_timer > 0:
-            self.current_animation.set_color_mode(255,100,100)
+            self.current_animation.set_color_mode(255,255,255)
+            self.current_animation.draw(self.x, self.y)
+
+            # 추가 밝기 효과를 위해 반투명 흰색 덧그리기
             self.current_animation.draw(self.x, self.y)
         elif self.current_animation:
             self.current_animation.reset_color_mode()

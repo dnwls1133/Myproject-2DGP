@@ -17,6 +17,7 @@ SDL_GetMouseState.restype = ctypes.c_uint32
 tilemap_bg = None
 tilemap_decoration = None
 tilemap_terrain = None
+tilemap_fg = None
 floor_manager = None  # 바닥 매니저 추가
 
 camera_x, camera_y = 0, 0
@@ -71,7 +72,56 @@ bg_tiles = {
     19: {'path': 'sprites/map/Texture2D/Background/Sprite/brotherhodd-start-background_5.png', 'solid': False}
 
 }
-
+fg_tiles = {
+1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_0.png', 'solid': False},
+    2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': False},
+    3: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_2.png', 'solid': False},
+    4: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_3.png', 'solid': False},
+    5: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_4.png', 'solid': False},
+    6: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_5.png', 'solid': False},
+    7: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_6.png', 'solid': False},
+    8: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_7.png', 'solid': False},
+    9: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_8.png', 'solid': False},
+    10: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_9.png', 'solid':  False},
+    11: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_10.png', 'solid': False},
+    12: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_11.png', 'solid': False},
+    13: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_12.png', 'solid': False},
+    14: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_13.png', 'solid': False},
+    15: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_15.png', 'solid': False},
+    16: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_17.png', 'solid': False},
+    17: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_18.png', 'solid': False},
+    18: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_20.png', 'solid': False},
+    19: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_21.png', 'solid': False},
+    20: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_27.png', 'solid': False},
+    21: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_28.png', 'solid': False},
+    22: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_31.png', 'solid': False},
+    23: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_32.png', 'solid': False},
+    24: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_33.png', 'solid': False},
+    25: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_34.png', 'solid': False},
+    26: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_35.png', 'solid': False},
+    27: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_36.png', 'solid': False},
+    28: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_37.png', 'solid': False},
+    29: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_38.png', 'solid': False},
+    30: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_39.png', 'solid': False},
+    31: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_40.png', 'solid': False},
+    32: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_41.png', 'solid': False},
+    33: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_42.png', 'solid': False},
+    34: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_43.png', 'solid': False},
+    35: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_44.png', 'solid': False},
+    36: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_45.png', 'solid': False},
+    37: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_46.png', 'solid': False},
+    38: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_47.png', 'solid': False},
+    39: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_48.png', 'solid': False},
+    40: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_49.png', 'solid': False},
+    41: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_50.png', 'solid': False},
+    42: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_51.png', 'solid': False},
+    43: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_52.png', 'solid': False},
+    44: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_53.png', 'solid': False},
+    45: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_54.png', 'solid': False},
+    46: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_55.png', 'solid': False},
+    47: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_56.png', 'solid': False},
+    48: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_57.png', 'solid': False}
+}
 decoration_tiles = {
     1: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_0.png', 'solid': False},
     2: {'path': 'sprites/map/Texture2D/Sprite/brotherhood-spritesheet_1.png', 'solid': False},
@@ -180,7 +230,8 @@ print(f"로드된 terrain 타일 개수: {len(terrain_tiles)}")
 layer_depths = {
     'background': 0,
     'decoration' : 10,
-    'terrain': 20
+    'terrain': 20,
+    'foreground': 30
 }
 
 # 서브레이어 개념 추가 (같은 레이어 내에서도 깊이 구분)
@@ -193,11 +244,13 @@ def get_current_tilemap():
         return tilemap_bg
     if current_layer == 'decoration':
         return tilemap_decoration
+    if current_layer == 'foreground':
+        return tilemap_fg
     return tilemap_terrain
 
 
 def init():
-    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
+    global tilemap_bg,tilemap_fg, tilemap_decoration, tilemap_terrain, floor_manager
 
     # 배경 레이어 (주로 큰 배경 이미지 여러장)
     tilemap_bg = TileMap(grid_size, grid_size)
@@ -211,25 +264,31 @@ def init():
     tilemap_terrain = TileMap(grid_size, grid_size)
     tilemap_terrain.create_empty_map(50, 30)
 
+    tilemap_fg = TileMap(grid_size, grid_size)
+    tilemap_fg.create_empty_map(50, 30)
+
     # 바닥 매니저 초기화
     floor_manager = FloorManager()
 
     tilemap_bg.load_tile_images(bg_tiles)
     tilemap_decoration.load_tile_images(decoration_tiles)
     tilemap_terrain.load_tile_images(terrain_tiles)
+    tilemap_fg.load_tile_images(fg_tiles)
+
 
     game_framework.camera_manager.set_zoom(1.0)
 
 def finish():
-    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
+    global tilemap_bg, tilemap_decoration, tilemap_terrain,tilemap_fg, floor_manager
     tilemap_bg = None
     tilemap_decoration = None
     tilemap_terrain = None
+    tilemap_fg = None
     floor_manager = None  # 바닥 매니저 해제
 
 def save_all():
     # 레이어별로 파일 분리 저장
-    global tilemap_bg, tilemap_decoration, tilemap_terrain
+    global tilemap_bg, tilemap_decoration, tilemap_terrain, tilemap_fg
 
     # 현재 맵 파일 이름 가져오기 (terrain 레이어 기준)
     base_filename = 'map'  # 기본값
@@ -246,6 +305,8 @@ def save_all():
         tilemap_decoration.save_to_file(f'{base_filename}_decoration.json')
     if tilemap_terrain:
         tilemap_terrain.save_to_file(f'{base_filename}_terrain.json')
+    if tilemap_fg:
+        tilemap_fg.save_to_file(f'{base_filename}_foreground.json')
 
     # 바닥 정보 저장 (맵 이름과 연동)
     if floor_manager:
@@ -257,7 +318,7 @@ def save_all():
 
 def save_all_as():
     """모든 레이어와 바닥 정보를 다른 이름으로 저장"""
-    global tilemap_bg, tilemap_decoration, tilemap_terrain
+    global tilemap_bg, tilemap_decoration, tilemap_terrain, tilemap_fg
 
     # tkinter 창 숨기기 (다이얼로그만 표시)
     root = tk.Tk()
@@ -296,6 +357,8 @@ def save_all_as():
         tilemap_decoration.save_to_file(f'{new_name}_decoration.json')
     if tilemap_terrain:
         tilemap_terrain.save_to_file(f'{new_name}_terrain.json')
+    if tilemap_fg:
+        tilemap_fg.save_to_file(f'{new_name}_foreground.json')
 
     # 바닥 정보 저장
     if floor_manager:
@@ -324,6 +387,11 @@ def load_all():
             tilemap_terrain.load_from_file('map_terrain.json')
     except Exception:
         pass
+    try:
+        if tilemap_fg:
+            tilemap_fg.load_from_file('map_foreground.json')
+    except Exception:
+        pass
 
     # 바닥 정보 로드 (terrain 맵 파일 이름 기준)
     base_filename = 'map'  # 기본값
@@ -345,7 +413,7 @@ def load_all():
 
 def load_all_with_dialog():
     """다이얼로그로 파일 이름을 입력받아 모든 레이어와 바닥 정보를 불러오기"""
-    global tilemap_bg, tilemap_decoration, tilemap_terrain, floor_manager
+    global tilemap_bg, tilemap_decoration, tilemap_terrain,tilemap_fg, floor_manager
 
     # tkinter 창 숨기기 (다이얼로그만 표시)
     root = tk.Tk()
@@ -394,6 +462,13 @@ def load_all_with_dialog():
             tilemap_terrain.load_from_file(f'{map_name}_terrain.json')
             success_count += 1
             print(f'지형 레이어 로드: {map_name}_terrain.json')
+    except Exception as e:
+        print(f'장식 레이어 로드 실패: {e}')
+    try:
+        if tilemap_fg:
+            tilemap_fg.load_from_file(f'{map_name}_foreground.json')
+            success_count += 1
+            print(f'전경 레이어 로드: {map_name}_foreground.json')
     except Exception as e:
         print(f'지형 레이어 로드 실패: {e}')
 
@@ -617,6 +692,8 @@ def handle_events():
                     current_layer = 'decoration'
                 elif current_layer == 'decoration':
                     current_layer = 'terrain'
+                elif current_layer == 'terrain':
+                    current_layer = 'foreground'
                 else:
                     current_layer = 'background'
                 print(f"현재 레이어: {current_layer}")
@@ -952,6 +1029,18 @@ def draw():
         # 자유 배치 타일
         for free_tile in tilemap_terrain.free_tiles:
             all_tiles.append((free_tile.depth, 'terrain', 'free', free_tile))
+    # 4. 전경 레이어 타일 수집 (지형 레이어 다음에 추가)
+    if tilemap_fg:
+        # 그리드 타일
+        for y, row in enumerate(tilemap_fg.tiles):
+            for x, tile_id in enumerate(row):
+                if tile_id > 0:
+                    depth = tilemap_fg.get_tile_depth(x, y)
+                    all_tiles.append((depth, 'foreground', 'grid', x, y, tile_id))
+        # 자유 배치 타일
+        for free_tile in tilemap_fg.free_tiles:
+            all_tiles.append((free_tile.depth, 'foreground', 'free', free_tile))
+
 
     # 깊이 기준으로 정렬 (낮은 값이 먼저 = 뒤에 그려짐)
     all_tiles.sort(key=lambda t: t[0])
@@ -1082,6 +1171,8 @@ def get_tilemap_by_name(layer_name):
         return tilemap_decoration
     elif layer_name == 'terrain':
         return tilemap_terrain
+    elif layer_name == 'foreground':  # 추가
+        return tilemap_fg
     return None
 
 

@@ -8,7 +8,7 @@ import machine.collider_manager
 from penintent import Penintent
 from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
-from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles
+from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
 from floor_object import FloorManager, FloorObject
 
 from tilemap import TileMap
@@ -69,6 +69,12 @@ def init():
     tilemap_deco.load_from_file('boss_decoration.json')
     game_world.add_object(tilemap_deco, 1)
     print(f"장식 타일맵 로드 완료 (그리드: {len([t for row in tilemap_deco.tiles for t in row if t > 0])}개, 자유: {len(tilemap_deco.free_tiles)}개)")
+
+    tilemap_fg = TileMap()
+    tilemap_fg.load_tile_images(fg_tiles)
+    tilemap_fg.load_from_file('boss_foreground.json')
+    game_world.add_object(tilemap_fg, 5)
+    print(f"전경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_fg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_fg.free_tiles)}개)")
 
     # FloorManager 생성 및 바닥 객체 로드
     floor_manager = FloorManager()
@@ -133,7 +139,7 @@ def init():
 def update():
     camera_speed = 5
     if game_framework.key_manager.is_down(SDLK_LEFT):
-        game_framework.camera_manager.move(-camera_speed, 0)
+            game_framework.camera_manager.move(-camera_speed, 0)
     if game_framework.key_manager.is_down(SDLK_RIGHT):
         game_framework.camera_manager.move(camera_speed, 0)
     if game_framework.key_manager.is_down(SDLK_UP):
