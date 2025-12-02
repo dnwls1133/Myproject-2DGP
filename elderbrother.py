@@ -8,6 +8,7 @@ from collider import Collider
 import game_world
 import math
 import random
+from physics_config import PhysicsConfig
 
 jump_voice_sound = None
 jump_sound = None
@@ -429,22 +430,39 @@ class ElderBrother:
         self.hp = 100
         self.x, self.y = 1300, 300
         self.face_dir = -1
+
         # 물리 속성
         self.vx = 0
         self.vy = 0
-
         self.on_ground = False
         self.ground = 200
-        # 물리 상수
-        self.gravity = -1233.0  # 중력 가속도
-        self.max_fall_speed = -1000.0  # 최대 낙하 속도
-        self.friction = 0.8  # 마찰 계수
 
-        # 이동 상수
-        self.move_speed = 250.0  # 이동 속도
-        self.jump_speed = 600.0  # 점프 속도
+        # ==================== 실제 물리 단위 기반 속성 ====================
+        # PhysicsConfig를 통해 실제 물리 값을 픽셀 단위로 변환
+        physics = PhysicsConfig.get_boss_physics()
+
+        # 중력 (pixels/s^2) - 실제 중력 9.81m/s^2를 픽셀로 변환
+        self.gravity = physics['gravity']  # -981 pixels/s^2
+
+        # 최대 낙하 속도 (pixels/s) - 실제 12m/s (보스는 더 무거움)
+        self.max_fall_speed = physics['max_fall_speed']  # -1200 pixels/s
+
+        # 점프 속도 (pixels/s) - 실제 8m/s (보스는 더 높이 점프)
+        self.jump_speed = physics['jump_speed']  # 800 pixels/s
+
+        # 마찰 계수 (무차원)
+        self.friction = 0.8
+
+        # 이동 속도 (pixels/s) - 보스는 일반적으로 이동하지 않음
+        self.move_speed = 250.0
+
+        # 실제 물리 단위 저장 (디버그 및 참조용)
+        self.height_meters = PhysicsConfig.Boss.HEIGHT_METERS
+        self.jump_speed_mps = PhysicsConfig.Boss.JUMP_SPEED_MPS
+        # ================================================================
 
         self.is_opening = True
+        self.is_grounded = False
 
         # 딕셔너리로 애니메이션 관리
         self.animations = {}
@@ -479,6 +497,20 @@ class ElderBrother:
 
         self.hit_flash_timer = 0.0
         self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
+
+    def get_real_position(self):
+        """실제 미터 단위 위치 반환 (디버그용)"""
+        return (
+            PhysicsConfig.pixels_to_meters(self.x),
+            PhysicsConfig.pixels_to_meters(self.y)
+        )
+
+    def get_real_velocity(self):
+        """실제 m/s 단위 속도 반환 (디버그용)"""
+        return (
+            PhysicsConfig.pps_to_mps(self.vx),
+            PhysicsConfig.pps_to_mps(self.vy)
+        )
 
     def create_effects(self, anim_name,x,y,delay=0.05,scale=1.5,flip=''):
         from Obj.effect import Effect

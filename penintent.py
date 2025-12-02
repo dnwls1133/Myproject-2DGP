@@ -5,6 +5,7 @@ from sdl2 import *
 from machine import events
 from collider import Collider
 import main_menu_mode
+from physics_config import PhysicsConfig
 
 
 
@@ -383,8 +384,8 @@ class Dodge:
         self.penintent.set_animation('dodge')
         self.penintent.current_animation.set_delay(0.04)
 
-        # 슬라이딩 초기 속도 설정
-        self.slide_speed = 1500.0 * self.penintent.face_dir
+        # 슬라이딩 초기 속도 설정 (PhysicsConfig 사용)
+        self.slide_speed = self.penintent.slide_speed_max * self.penintent.face_dir
 
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
@@ -664,14 +665,14 @@ class Jump:
                     self.penintent.vx = 0
                 else:
                     self.penintent.face_dir = -1
-                    self.penintent.vx = self.penintent.move_speed * self.penintent.face_dir
+                    self.penintent.vx = self.penintent.walk_speed * self.penintent.face_dir
 
             elif d_held:
                 if a_held:
                     self.penintent.vx = 0
                 else:
                     self.penintent.face_dir = 1
-                    self.penintent.vx = self.penintent.move_speed * self.penintent.face_dir
+                    self.penintent.vx = self.penintent.walk_speed * self.penintent.face_dir
 
 
         self.penintent.vy = self.penintent.jump_speed
@@ -808,22 +809,42 @@ class Penintent:
 
         self.x, self.y = 400,500
         self.face_dir = 1
+
         # 물리 속성
         self.vx = 0
         self.vy = 0
-
         self.on_ground = False
         self.ground = 100
-        # 물리 상수
-        self.gravity = -1233.0  # 중력 가속도
-        self.max_fall_speed = -1000.0  # 최대 낙하 속도
-        self.friction = 0.8  # 마찰 계수
 
-        # 이동 상수
-        self.move_speed = 250.0  # 이동 속도
-        self.jump_speed = 600.0  # 점프 속도
+        # ==================== 실제 물리 단위 기반 속성 ====================
+        # PhysicsConfig를 통해 실제 물리 값을 픽셀 단위로 변환
+        physics = PhysicsConfig.get_character_physics()
 
+        # 중력 (pixels/s^2) - 실제 중력 9.81m/s^2를 픽셀로 변환
+        self.gravity = physics['gravity']  # -981 pixels/s^2
 
+        # 최대 낙하 속도 (pixels/s) - 실제 10m/s
+        self.max_fall_speed = physics['max_fall_speed']  # -1000 pixels/s
+
+        # 이동 속도 (pixels/s) - 실제 4m/s (달리기)
+        self.move_speed = physics['run_speed']  # 400 pixels/s
+
+        self.walk_speed = physics['walk_speed']  # 200 pixels/s
+
+        # 점프 속도 (pixels/s) - 실제 6m/s
+        self.jump_speed = physics['jump_speed']  # 600 pixels/s
+
+        # 슬라이드 속도 (pixels/s) - 실제 15m/s
+        self.slide_speed_max = physics['slide_speed']  # 1500 pixels/s
+
+        # 마찰 계수 (무차원)
+        self.friction = 0.8
+
+        # 실제 물리 단위 저장 (디버그 및 참조용)
+        self.height_meters = PhysicsConfig.Character.HEIGHT_METERS
+        self.move_speed_mps = PhysicsConfig.Character.RUN_SPEED_MPS
+        self.jump_speed_mps = PhysicsConfig.Character.JUMP_SPEED_MPS
+        # ================================================================
 
         # 딕셔너리로 애니메이션 관리
         self.animations = {}
@@ -907,6 +928,19 @@ class Penintent:
 
         self.is_grounded = False  # 땅에 닿아있는지 여부
 
+    def get_real_position(self):
+        """실제 미터 단위 위치 반환 (디버그용)"""
+        return (
+            PhysicsConfig.pixels_to_meters(self.x),
+            PhysicsConfig.pixels_to_meters(self.y)
+        )
+
+    def get_real_velocity(self):
+        """실제 m/s 단위 속도 반환 (디버그용)"""
+        return (
+            PhysicsConfig.pps_to_mps(self.vx),
+            PhysicsConfig.pps_to_mps(self.vy)
+        )
 
     def create_effects(self, anim_name,x,y,delay=0.05,scale=1.5,flip=''):
         from Obj.effect import Effect
