@@ -7,7 +7,7 @@ import game_framework
 from Obj.UI.crisanta_bg import CrisantaBg
 from Obj.UI.crisanta import Crisanta
 
-import play_mode
+import start_mode
 
 # 애니메이션 매니저 초기화
 anim_manager = None
@@ -61,7 +61,7 @@ def update():
     if game_framework.key_manager.is_down(SDLK_p):
         game_framework.camera_manager.shake(10,0.5)
     if game_framework.key_manager.is_down(SDLK_SPACE):
-        game_framework.change_mode(play_mode)
+        game_framework.change_mode(start_mode)
 
     game_world.update()
 

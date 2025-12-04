@@ -5,7 +5,7 @@ from machine.animation import register_animations
 import game_world
 import game_framework
 import machine.collider_manager
-from penintent import Penintent
+#from penintent import Penintent
 from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
@@ -18,9 +18,11 @@ from tilemap import TileMap
 anim_manager = None
 floor_manager = None
 bgm = None
+fade_alpha = 255  # ✅ 255로 수정
+fade_speed = 300  # ✅ 속도 증가 (약 0.85초 소요)
+black_screen = None
 
-
-
+door = None
 def handle_events():
 
     if game_framework.key_manager.quit:
@@ -29,10 +31,11 @@ def handle_events():
 
 def init():
 
-
-
-    global anim_manager, floor_manager,bgm
-
+    from penintent import Penintent
+    from door import Door
+    global anim_manager, floor_manager, bgm, fade_alpha, black_screen, door
+    fade_alpha = 255  # ✅ 255로 수정
+    black_screen = load_image('black_screen.png')
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
     game_framework.camera_manager.set_world_size(1700,1000)
     game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
@@ -40,7 +43,9 @@ def init():
 
     anim_manager = AnimationManager()
 
-
+    def go_to_boss_stage():
+        import play_mode
+        game_framework.change_mode(play_mode)
     try:
         # 애니메이션 등록
         register_animations(anim_manager)
@@ -109,6 +114,9 @@ def init():
 
     machine.collider_manager.add_collision_pair('player:wall', penintent, wall)
 
+    door = Door(1800,200,50,100,on_enter_callback=go_to_boss_stage)
+    game_world.add_object(door,2)
+    machine.collider_manager.add_collision_pair('player:door', penintent, door)
 
 
 
@@ -127,6 +135,14 @@ def init():
 
 
 def update():
+    global fade_alpha,door
+    import play_mode
+    # 페이드인 효과
+    if fade_alpha > 0:
+        fade_alpha -= fade_speed * game_framework.time_manager.get_fixed_dt()
+        if fade_alpha < 0:
+            fade_alpha = 0
+
     camera_speed = 5
     if game_framework.key_manager.is_down(SDLK_LEFT):
             game_framework.camera_manager.move(-camera_speed, 0)
@@ -141,6 +157,9 @@ def update():
     if game_framework.key_manager.is_down(SDLK_ESCAPE):
         game_framework.quit()
 
+    if door.stage_changed == True:
+        game_framework.change_mode(play_mode)
+
     game_world.update()
 
     # 충돌 체크는 game_framework에서 자동으로 실행됨 (중복 제거)
@@ -149,7 +168,15 @@ def draw():
     clear_canvas()
     game_world.render()
 
+    # 페이드 효과
+    if fade_alpha > 0 and black_screen:
+        canvas_w = get_canvas_width()
+        canvas_h = get_canvas_height()
 
+        # opacify()는 0.0~1.0 범위
+        opacity = max(0.0, min(1.0, fade_alpha / 255.0))
+        black_screen.opacify(opacity)
+        black_screen.draw(canvas_w // 2, canvas_h // 2, canvas_w, canvas_h)
 
     update_canvas()
 

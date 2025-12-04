@@ -5,7 +5,7 @@ from machine.animation import register_animations
 import game_world
 import game_framework
 import machine.collider_manager
-from penintent import Penintent
+#from penintent import Penintent
 from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
@@ -19,8 +19,9 @@ from wall import Wall
 anim_manager = None
 floor_manager = None
 bgm = None
-
-
+fade_alpha = 255  # 페이드인 효과용
+fade_speed = 300  # 초당 alpha 감소량
+black_screen = None
 
 def handle_events():
 
@@ -29,10 +30,13 @@ def handle_events():
 
 
 def init():
+    from penintent import Penintent
 
+    global anim_manager, floor_manager,bgm, fade_alpha, black_screen
+    fade_alpha = 255
 
-
-    global anim_manager, floor_manager,bgm
+    # 검은 화면 이미지 로드
+    black_screen = load_image('black_screen.png')
 
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
     game_framework.camera_manager.set_world_size(1800,1000)
@@ -100,10 +104,18 @@ def init():
     print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
 
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,-5,200)
+    penintent = Penintent(anim_manager,10,200)
     # 플레이어에게 타일맵 참조 전달
     penintent.terrain_tilemap = tilemap_terrain
     penintent.decoration_tilemap = tilemap_deco
+    # ✅ 상태 명시적 초기화
+    penintent.x = 10
+    penintent.y = 200
+    penintent.vx = 0
+    penintent.vy = 0
+    penintent.is_grounded = False
+    penintent.state_machine.current_state = penintent.IDLE
+    penintent.set_animation('idle')
     game_world.add_object(penintent, 3)
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
@@ -140,6 +152,13 @@ def init():
 
 
 def update():
+    global fade_alpha
+
+    # 페이드인 효과
+    if fade_alpha > 0:
+        fade_alpha -= fade_speed * game_framework.time_manager.get_fixed_dt()
+        if fade_alpha < 0:
+            fade_alpha = 0
     camera_speed = 5
     if game_framework.key_manager.is_down(SDLK_LEFT):
             game_framework.camera_manager.move(-camera_speed, 0)
@@ -153,8 +172,9 @@ def update():
         game_framework.camera_manager.shake(10,0.5)
     if game_framework.key_manager.is_down(SDLK_ESCAPE):
         game_framework.quit()
+    if fade_alpha == 0:
+        game_world.update()
 
-    game_world.update()
 
     # 충돌 체크는 game_framework에서 자동으로 실행됨 (중복 제거)
 
@@ -162,7 +182,12 @@ def draw():
     clear_canvas()
     game_world.render()
 
-
+    # 페이드 효과
+    if fade_alpha > 0 and black_screen:
+        canvas_w = get_canvas_width()
+        canvas_h = get_canvas_height()
+        black_screen.opacify(fade_alpha / 255.0)
+        black_screen.draw(canvas_w // 2, canvas_h // 2, canvas_w, canvas_h)
 
     update_canvas()
 
