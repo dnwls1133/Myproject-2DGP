@@ -33,6 +33,9 @@ class FloorObject:
         self.collider = Collider(self, offset_x=0, offset_y=0, width=width, height=height)
         self.collider.active = True
 
+    def on_collision_exit(self,group, other, collision_info):
+        """충돌 종료 시 호출"""
+        pass
     def get_rotated_corners(self):
         """회전된 사각형의 4개 꼭짓점 좌표를 반환 (월드 좌표)
 
@@ -127,6 +130,7 @@ class FloorObject:
 
     def draw(self):
         """렌더링 없음 (디버그용으로만 충돌체 그림)"""
+        self.collider.draw_debug()
         pass
 
     def draw_debug(self, is_colliding=False, camera_x=0, camera_y=0):
@@ -200,6 +204,7 @@ class FloorManager:
 
     def draw(self):
         """렌더링 (바닥은 충돌체만 있으므로 기본적으로 아무것도 안 그림)"""
+
         pass
 
     def draw_debug(self, camera_x=0, camera_y=0, colliding_floors=None):

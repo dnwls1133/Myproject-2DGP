@@ -4,7 +4,7 @@ from machine.state_machine import StateMachine
 from sdl2 import *
 from machine import events
 from collider import Collider
-import main_menu_mode
+
 from physics_config import PhysicsConfig
 
 
@@ -35,17 +35,17 @@ class Idle:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > self.penintent.ground:
+        if self.penintent.is_grounded == False:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
                 self.penintent.vy = self.penintent.max_fall_speed
-            self.penintent.is_grounded = False
+            #self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
+            #self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
-            self.penintent.is_grounded = True
+            #self.penintent.is_grounded = True
 
         # 위치 업데이트
         self.penintent.y += self.penintent.vy * dt
@@ -177,17 +177,17 @@ class Run:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > self.penintent.ground:
+        if self.penintent.is_grounded == False:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
                 self.penintent.vy = self.penintent.max_fall_speed
-            self.penintent.is_grounded = False
+            #self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
+            #self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
-            self.penintent.is_grounded = True
+            #self.penintent.is_grounded = True
 
         # 위치 업데이트
         self.penintent.x += self.penintent.vx * dt
@@ -239,17 +239,17 @@ class Start_Run:
         # 바닥 체크
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > self.penintent.ground:
+        if self.penintent.is_grounded == False:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
                 self.penintent.vy = self.penintent.max_fall_speed
-            self.penintent.is_grounded = False
+            #self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
+            #self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
-            self.penintent.is_grounded = True
+            #self.penintent.is_grounded = True
 
         # 위치 업데이트
         self.penintent.x += self.penintent.vx * dt
@@ -459,17 +459,17 @@ class Dodge:
         # 물리 처리
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
 
-        if char_bottom > self.penintent.ground:
+        if  self.penintent.is_grounded == False:
             # 공중에 있을 때 중력 적용
             self.penintent.vy += self.penintent.gravity * dt
             if self.penintent.vy < self.penintent.max_fall_speed:
                 self.penintent.vy = self.penintent.max_fall_speed
-            self.penintent.is_grounded = False
+            #self.penintent.is_grounded = False
         else:
             # 바닥에 닿았을 때
-            self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
+            #self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
-            self.penintent.is_grounded = True
+            #self.penintent.is_grounded = True
 
         # 위치 업데이트
         self.penintent.x += self.penintent.vx * dt
@@ -681,6 +681,7 @@ class Jump:
         else:
             self.penintent.current_animation.set_flip('h')
 
+
     def exit(self, e):
         self.penintent.vx = 0
         pass
@@ -751,12 +752,17 @@ class Jump:
         self.penintent.x += self.penintent.vx * dt
         self.penintent.y += self.penintent.vy * dt
 
+        if self.penintent.current_animation.current_frame == 4:
+            self.penintent.collider.active = True
+
         # 바닥 체크
+
         char_bottom = self.penintent.y - self.penintent.collider.height / 2
         if char_bottom <= self.penintent.ground:
             self.penintent.y = self.penintent.ground + self.penintent.collider.height / 2
             self.penintent.vy = 0
             self.penintent.is_grounded = True
+
 
     def draw(self):
         if self.penintent.current_animation:
@@ -765,7 +771,7 @@ class Jump:
 
 
 class Penintent:
-    def __init__(self, anim_manager):
+    def __init__(self, anim_manager,x,y):
         game_framework.camera_manager.set_target(self)
         self.anim_manager = anim_manager
         self.collider = Collider(self, offset_x=0, offset_y=0, width=40, height=90)
@@ -807,14 +813,14 @@ class Penintent:
         # 캐릭터 속성
         self.hp = 100
 
-        self.x, self.y = 400,500
+        self.x, self.y = x,y
         self.face_dir = 1
 
         # 물리 속성
         self.vx = 0
         self.vy = 0
         self.on_ground = False
-        self.ground = 100
+        self.ground = 90
 
         # ==================== 실제 물리 단위 기반 속성 ====================
         # PhysicsConfig를 통해 실제 물리 값을 픽셀 단위로 변환
@@ -1077,6 +1083,8 @@ class Penintent:
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             if self.hp <= 0:
                 self.state_machine.handle_state_event(("DEAD",None))
+        if group == 'player:floor':
+            self.is_grounded = True
 
         pass
 
@@ -1086,6 +1094,8 @@ class Penintent:
 
     def on_collision_exit(self, group, other, collider_type):
         """충돌 종료"""
+        if group == 'player:floor':
+            self.is_grounded = False
         pass  # 필요시 구현
 
     def check_terrain_collision(self):

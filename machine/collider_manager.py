@@ -47,11 +47,6 @@ def check_collisions(group):
         if hasattr(a, 'jump_attack_collider') and a.jump_attack_collider.active:
             a_attack_colliders.append(('jump_attack', a.jump_attack_collider))
 
-
-
-
-
-
         # a의 기본 충돌체
         a_base_collider = None
         if hasattr(a, 'collider') and a.collider.active:
@@ -66,8 +61,6 @@ def check_collisions(group):
 
             if hasattr(b, 'jump_attack_collider') and b.jump_attack_collider.active:
                 b_attack_colliders.append(('jump_attack', b.jump_attack_collider))
-
-
 
             # b의 기본 충돌체
             b_base_collider = None
@@ -127,6 +120,32 @@ def check_collisions(group):
                     else:
                         b_attack.is_colliding = False
 
+            # 3) 기본 충돌체 vs 기본 충돌체 (바닥, 벽 등과의 충돌)
+            if a_base_collider and b_base_collider :
+                collision_key = (id(a_base_collider), id(b_base_collider))
+
+                if a_base_collider.collides_with(b_base_collider):
+                    a_base_collider.is_colliding = True
+                    b_base_collider.is_colliding = True
+                    current_collisions.add(collision_key)
+
+                    if collision_key not in collision_states.get(group, {}):
+                        # 충돌 시작 (Enter)
+                        if hasattr(a, 'on_collision_enter'):
+                            a.on_collision_enter(group, b, 'base1')
+                        if hasattr(b, 'on_collision_enter'):
+                            b.on_collision_enter(group, a, 'base1')
+                    else:
+                        # 충돌 지속 (On)
+                        if hasattr(a, 'on_collision'):
+                            a.on_collision(group, b, 'base1')
+                        if hasattr(b, 'on_collision'):
+                            b.on_collision(group, a, 'base1')
+                else:
+                    # 충돌하지 않을 때는 is_colliding을 False로 설정하지 않음
+                    # (다른 객체와 충돌 중일 수 있으므로)
+                    pass
+
     # 충돌 종료 감지 (Exit)
     if group in collision_states:
         for collision_key in collision_states[group]:
@@ -135,6 +154,8 @@ def check_collisions(group):
                 # collision_key는 (collider_id_1, collider_id_2) 형태
                 # 실제 객체를 찾아서 on_collision_exit 호출
                 # (간단하게 하기 위해 현재는 생략, 필요시 매핑 추가)
+                a.on_collision_exit(group, b, 'unknown')
+                b.on_collision_exit(group, a, 'unknown')
                 pass
 
     # 현재 프레임 충돌 상태 저장

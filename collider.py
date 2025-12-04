@@ -88,12 +88,12 @@ class Collider:
 
         # 충돌 상태에 따라 색상 변경
         if is_colliding:
-            pass
+
             # 빨간색 (충돌 중)
-            # draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)
+            draw_rectangle(screen_left, screen_bottom, screen_right, screen_top)
         else:
             # 초록색 (충돌 없음) - pico2d는 색상 설정이 제한적이므로 여러 번 그려서 표현
             # 실제로는 OpenGL 색상을 직접 설정해야 하지만, 간단하게 선 두께로 구분
             for i in range(3):
-                pass
-                # draw_rectangle(screen_left - i, screen_bottom - i, screen_right + i, screen_top + i)
+
+                draw_rectangle(screen_left - i, screen_bottom - i, screen_right + i, screen_top + i)

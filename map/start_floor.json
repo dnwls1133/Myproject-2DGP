@@ -17,34 +17,10 @@
       "rotation": 0
     },
     {
-      "x": 746.0,
-      "y": 240.0,
-      "width": 80,
-      "height": 82,
-      "floor_type": "ground",
-      "rotation": 0
-    },
-    {
-      "x": 848.5,
-      "y": 196.0,
-      "width": 135,
-      "height": 60,
-      "floor_type": "ground",
-      "rotation": 0
-    },
-    {
       "x": 941.5,
       "y": 142.5,
       "width": 55,
       "height": 47,
-      "floor_type": "ground",
-      "rotation": 0
-    },
-    {
-      "x": 1019.0,
-      "y": 110.5,
-      "width": 84,
-      "height": 43,
       "floor_type": "ground",
       "rotation": 0
     },
@@ -109,6 +85,86 @@
       "y": 71.5,
       "width": 204,
       "height": 43,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 722.5,
+      "y": 265.0,
+      "width": 29,
+      "height": 52,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 761.0,
+      "y": 222.5,
+      "width": 40,
+      "height": 105,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 798.0,
+      "y": 202.0,
+      "width": 26,
+      "height": 90,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 827.5,
+      "y": 175.5,
+      "width": 27,
+      "height": 115,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 865.0,
+      "y": 147.5,
+      "width": 38,
+      "height": 113,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 899.0,
+      "y": 130.5,
+      "width": 28,
+      "height": 93,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 984.5,
+      "y": 96.0,
+      "width": 23,
+      "height": 96,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 1017.5,
+      "y": 86.0,
+      "width": 31,
+      "height": 62,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 1053.0,
+      "y": 70.5,
+      "width": 36,
+      "height": 59,
+      "floor_type": "ground",
+      "rotation": 0
+    },
+    {
+      "x": 21.0,
+      "y": 84.5,
+      "width": 42,
+      "height": 91,
       "floor_type": "ground",
       "rotation": 0
     }

@@ -74,7 +74,7 @@ class TileMap:
         """타일 ID에 해당하는 타일의 크기 반환"""
         return self.tile_sizes.get(tile_id, (32,32))
 
-    def draw(self, camera_x=0, camera_y=0,scale=2.0,use_camera=True):
+    def draw(self, ratio = 0.0, camera_y=0,scale=2.0,use_camera=True):
         """타일맵을 그립니다."""
 
         if use_camera:
@@ -180,6 +180,8 @@ class TileMap:
                     screen_x, screen_y,  # 위치
                     draw_width, draw_height  # 크기
                 )
+
+
 
 
     def save_map_as(self):

@@ -33,7 +33,7 @@ def init():
     global anim_manager, floor_manager,bgm
 
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
-    game_framework.camera_manager.set_world_size(1800,1000)
+    game_framework.camera_manager.set_world_size(1700,1000)
     game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
@@ -51,14 +51,14 @@ def init():
     # 타일맵 로드 (레이어 0: 배경)
     tilemap_bg = TileMap()
     tilemap_bg.load_tile_images(bg_tiles)
-    tilemap_bg.load_from_file('boss_bg.json')
+    tilemap_bg.load_from_file('map\start_bg.json')
     game_world.add_object(tilemap_bg, 0)
     print(f"배경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_bg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_bg.free_tiles)}개)")
 
     # 타일맵 로드 (레이어 1: 지형)
     tilemap_terrain = TileMap()
     tilemap_terrain.load_tile_images(terrain_tiles)
-    tilemap_terrain.load_from_file('boss_terrain.json')
+    tilemap_terrain.load_from_file('map\start_terrain.json')
     game_world.add_object(tilemap_terrain, 2)
     print(f"지형 타일맵 로드 완료 (그리드: {len([t for row in tilemap_terrain.tiles for t in row if t > 0])}개, 자유: {len(tilemap_terrain.free_tiles)}개)")
 
@@ -66,20 +66,20 @@ def init():
     # 타일맵 로드 (레이어 3: 장식 - 플레이어 위에 그려질 수 있음)
     tilemap_deco = TileMap()
     tilemap_deco.load_tile_images(decoration_tiles)
-    tilemap_deco.load_from_file('boss_decoration.json')
+    tilemap_deco.load_from_file('map\start_decoration.json')
     game_world.add_object(tilemap_deco, 1)
     print(f"장식 타일맵 로드 완료 (그리드: {len([t for row in tilemap_deco.tiles for t in row if t > 0])}개, 자유: {len(tilemap_deco.free_tiles)}개)")
 
     tilemap_fg = TileMap()
     tilemap_fg.load_tile_images(fg_tiles)
-    tilemap_fg.load_from_file('boss_foreground.json')
+    tilemap_fg.load_from_file('map\start_foreground.json')
     game_world.add_object(tilemap_fg, 5)
     print(f"전경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_fg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_fg.free_tiles)}개)")
 
     # FloorManager 생성 및 바닥 객체 로드
     floor_manager = FloorManager()
     try:
-        floor_manager = FloorManager.load_from_file('map/boss_floor.json')
+        floor_manager = FloorManager.load_from_file('map/start_floor.json')
         print(f"바닥 정보 로드 완료: {len(floor_manager.floors)}개")
     except FileNotFoundError:
         print("바닥 파일이 없습니다. 기본 바닥을 생성합니다.")
@@ -93,12 +93,9 @@ def init():
 
     game_world.add_object(floor_manager, 2)
 
-    elderbrother = ElderBrother(anim_manager)
-    game_world.add_object(elderbrother, 0)
-    print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
 
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,200,-50)
+    penintent = Penintent(anim_manager,1300,100)
     # 플레이어에게 타일맵 참조 전달
     penintent.terrain_tilemap = tilemap_terrain
     penintent.decoration_tilemap = tilemap_deco
@@ -109,23 +106,12 @@ def init():
 
 
 
-    # 충돌 페어 등록 : 플레이어 공격 -> 엘더 형님 본체
-    machine.collider_manager.add_collision_pair(
-        'player_attack:elderBrother',
-        penintent,
-        elderbrother
-    )
 
-    # 충돌 페어 등록 : 엘더 형님 공격 -> 플레이어 본체
-    machine.collider_manager.add_collision_pair(
-        'elderBrother_attack:player',
-        elderbrother,
-        penintent
-    )
+
 
     print("충돌 페어 등록 완료")
 
-    # 충돌 페어 등록 : 플레이어 본체 -> 모든 바닥
+
     for floor in floor_manager.get_all_floors():
         machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
 
