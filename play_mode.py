@@ -13,6 +13,8 @@ from floor_object import FloorManager, FloorObject
 
 from tilemap import TileMap
 
+from wall import Wall
+
 # 애니메이션 매니저 초기화
 anim_manager = None
 floor_manager = None
@@ -51,14 +53,14 @@ def init():
     # 타일맵 로드 (레이어 0: 배경)
     tilemap_bg = TileMap()
     tilemap_bg.load_tile_images(bg_tiles)
-    tilemap_bg.load_from_file('boss_bg.json')
+    tilemap_bg.load_from_file('map/boss_bg.json')
     game_world.add_object(tilemap_bg, 0)
     print(f"배경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_bg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_bg.free_tiles)}개)")
 
     # 타일맵 로드 (레이어 1: 지형)
     tilemap_terrain = TileMap()
     tilemap_terrain.load_tile_images(terrain_tiles)
-    tilemap_terrain.load_from_file('boss_terrain.json')
+    tilemap_terrain.load_from_file('map/boss_terrain.json')
     game_world.add_object(tilemap_terrain, 2)
     print(f"지형 타일맵 로드 완료 (그리드: {len([t for row in tilemap_terrain.tiles for t in row if t > 0])}개, 자유: {len(tilemap_terrain.free_tiles)}개)")
 
@@ -66,13 +68,13 @@ def init():
     # 타일맵 로드 (레이어 3: 장식 - 플레이어 위에 그려질 수 있음)
     tilemap_deco = TileMap()
     tilemap_deco.load_tile_images(decoration_tiles)
-    tilemap_deco.load_from_file('boss_decoration.json')
+    tilemap_deco.load_from_file('map/boss_decoration.json')
     game_world.add_object(tilemap_deco, 1)
     print(f"장식 타일맵 로드 완료 (그리드: {len([t for row in tilemap_deco.tiles for t in row if t > 0])}개, 자유: {len(tilemap_deco.free_tiles)}개)")
 
     tilemap_fg = TileMap()
     tilemap_fg.load_tile_images(fg_tiles)
-    tilemap_fg.load_from_file('boss_foreground.json')
+    tilemap_fg.load_from_file('map/boss_foreground.json')
     game_world.add_object(tilemap_fg, 5)
     print(f"전경 타일맵 로드 완료 (그리드: {len([t for row in tilemap_fg.tiles for t in row if t > 0])}개, 자유: {len(tilemap_fg.free_tiles)}개)")
 
@@ -98,7 +100,7 @@ def init():
     print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
 
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,200,-50)
+    penintent = Penintent(anim_manager,-5,200)
     # 플레이어에게 타일맵 참조 전달
     penintent.terrain_tilemap = tilemap_terrain
     penintent.decoration_tilemap = tilemap_deco
@@ -106,8 +108,9 @@ def init():
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
 
-
-
+    wall = Wall(-20,300,10,1000)
+    game_world.add_object(wall,2)
+    machine.collider_manager.add_collision_pair('player:wall', penintent, wall)
 
     # 충돌 페어 등록 : 플레이어 공격 -> 엘더 형님 본체
     machine.collider_manager.add_collision_pair(

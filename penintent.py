@@ -4,6 +4,7 @@ from machine.state_machine import StateMachine
 from sdl2 import *
 from machine import events
 from collider import Collider
+import main_menu_mode
 
 from physics_config import PhysicsConfig
 
@@ -1081,15 +1082,33 @@ class Penintent:
             self.hp -= 10
             self.vx = -20 * self.face_dir
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
+
+            effect_x = self.x
+            effect_y = self.y
+            self.create_effects(
+                'penitent_attack_spark1',
+                effect_x,
+                effect_y,
+                delay=0.05,
+                scale=0.5,
+                flip='' if self.face_dir == 1 else 'h'
+            )
+
             if self.hp <= 0:
                 self.state_machine.handle_state_event(("DEAD",None))
         if group == 'player:floor':
+            self.is_grounded = True
+        if group == 'player:wall':
+            self.vx = 0
+            self.x = 1060  # 벽 밖으로 나가지 않도록 위치 조정
             self.is_grounded = True
 
         pass
 
     def on_collision(self, group, other, collider_type):
         """충돌 지속"""
+        if group == 'player:floor':
+            self.is_grounded = True
         pass  # 필요시 구현
 
     def on_collision_exit(self, group, other, collider_type):

@@ -428,7 +428,7 @@ class ElderBrother:
                       'elder_brother_jump',
                       'elder_brother_death']
         self.hp = 100
-        self.x, self.y = 1300, 300
+        self.x, self.y = 1300, 150
         self.face_dir = -1
 
         # 물리 속성
@@ -622,7 +622,7 @@ class ElderBrother:
         self.state_machine.draw()
 
         if self.is_opening:
-            self.current_animation.set_color_mode(50, 50, 50)
+            self.current_animation.set_color_mode(10, 10, 10)
             self.current_animation.draw(self.x, self.y)
         else:
             if self.current_animation and self.hit_flash_timer > 0:

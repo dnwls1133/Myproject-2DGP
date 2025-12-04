@@ -10,6 +10,7 @@ from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
 from floor_object import FloorManager, FloorObject
+from wall import Wall
 
 from tilemap import TileMap
 
@@ -95,15 +96,18 @@ def init():
 
 
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,1300,100)
+    penintent = Penintent(anim_manager,1300,150)
     # 플레이어에게 타일맵 참조 전달
     penintent.terrain_tilemap = tilemap_terrain
     penintent.decoration_tilemap = tilemap_deco
     game_world.add_object(penintent, 3)
     print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
 
+    wall = Wall(1000,300,50,400)
+    game_world.add_object(wall,2)
+    print(f"벽 생성 완료: 위치 ({wall.x}, {wall.y})")
 
-
+    machine.collider_manager.add_collision_pair('player:wall', penintent, wall)
 
 
 

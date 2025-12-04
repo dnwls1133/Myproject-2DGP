@@ -7,6 +7,14 @@
       "height": 59,
       "floor_type": "ground",
       "rotation": 0
+    },
+    {
+      "x": 42.5,
+      "y": 75.5,
+      "width": 25,
+      "height": 63,
+      "floor_type": "ground",
+      "rotation": 0
     }
   ]
 }
