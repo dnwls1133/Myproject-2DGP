@@ -115,9 +115,9 @@ class Jump:
         self.elder_brother = elder_brother
         self.air_time = 0.8
         self.max_jump_height = 600  # 최고 점프 높이
-
+        self.sound_played = False
     def enter(self, e):
-
+        self.sound_played = False
         self.elder_brother.set_animation('elder_brother_jump')
         self.elder_brother.current_animation.set_delay(0.1)
 
@@ -144,10 +144,15 @@ class Jump:
                 self.elder_brother.face_dir = -1
                 self.elder_brother.current_animation.set_flip('h')
 
-        jump_voice_sound.set_volume(64)
+
+        jump_voice_sound.set_volume(256)
+        jump_voice_sound.play()
+        jump_voice_sound.play()
         jump_voice_sound.play()
 
-        jump_sound.set_volume(64)
+        jump_sound.set_volume(256)
+        jump_sound.play()
+        jump_sound.play()
         jump_sound.play()
 
 
@@ -210,8 +215,15 @@ class Jump:
                     scale=1.0,
                     flip='' if self.elder_brother.face_dir == 1 else 'h'
                 )
-                landing_sound.set_volume(64)
-                landing_sound.play()
+                if not self.sound_played:
+                    landing_sound.set_volume(256)
+                    landing_sound.play()
+                    landing_sound.play()
+                    landing_sound.play()
+                    landing_sound.play()
+                    landing_sound.play()
+                    self.sound_played = True
+
 
         if self.elder_brother.y >= self.max_jump_height and self.elder_brother.is_opening:
             self.elder_brother.is_opening = False
@@ -228,9 +240,9 @@ class Jump:
 class Attack:
     def __init__(self, elder_brother):
         self.elder_brother = elder_brother
-
+        self.sound_played = False
     def enter(self, e):
-
+        self.sound_played = False
         self.elder_brother.vx = 0
         self.elder_brother.set_animation('elder_brother_attack')
         self.elder_brother.current_animation.set_delay(0.05)
@@ -250,7 +262,9 @@ class Attack:
                 self.elder_brother.current_animation.set_flip('h')
 
         self.elder_brother.apply_attack_collider_preset('elder_brother_attack')
-        attack_voice_sound.set_volume(64)
+        attack_voice_sound.set_volume(256)
+        attack_voice_sound.play()
+        attack_voice_sound.play()
         attack_voice_sound.play()
 
 
@@ -279,8 +293,12 @@ class Attack:
                     scale=2.0,
                     flip='' if self.elder_brother.face_dir == 1 else 'h'
                 )
-                attack_sound.set_volume(64)
-                attack_sound.play()
+                if not self.sound_played:
+                    attack_sound.set_volume(256)
+                    attack_sound.play()
+                    attack_sound.play()
+                    attack_sound.play()
+                    self.sound_played = True
 
 
 

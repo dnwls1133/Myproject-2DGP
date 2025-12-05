@@ -22,6 +22,8 @@ bgm = None
 fade_alpha = 255  # 페이드인 효과용
 fade_speed = 300  # 초당 alpha 감소량
 black_screen = None
+elderbrother = None
+bgm_on = False
 
 def handle_events():
 
@@ -32,7 +34,7 @@ def handle_events():
 def init():
     from penintent import Penintent
 
-    global anim_manager, floor_manager,bgm, fade_alpha, black_screen
+    global anim_manager, floor_manager,bgm, fade_alpha, black_screen, elderbrother
     fade_alpha = 255
 
     # 검은 화면 이미지 로드
@@ -146,13 +148,17 @@ def init():
 
     print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
 
-    bgm.repeat_play()
+    #bgm.repeat_play()
 
-    bgm.set_volume(64)
+    #bgm.set_volume(64)
 
 
 def update():
-    global fade_alpha
+    global fade_alpha, elderbrother, bgm_on
+    if elderbrother.is_opening == False and bgm_on == False:
+        bgm_on = True
+        bgm.repeat_play()
+        bgm.set_volume(64)
 
     # 페이드인 효과
     if fade_alpha > 0:

@@ -129,9 +129,9 @@ def init():
 
     print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
 
-    bgm.repeat_play()
+    #bgm.repeat_play()
 
-    bgm.set_volume(64)
+    #bgm.set_volume(64)
 
 
 def update():
@@ -184,8 +184,8 @@ def finish():
     global bgm
     game_world.clear()
     machine.collider_manager.clear_collision_pairs()
-    if bgm:
-        bgm.stop()
+    #if bgm:
+        #bgm.stop()
 
 def pause():
     pass
