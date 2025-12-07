@@ -13,7 +13,7 @@ from floor_object import FloorManager, FloorObject
 from Obj.UI.penient_life_ui import Penient_life_ui
 from Obj.UI.health import Health
 from Obj.UI.death_screen_title import DeathScreenTitle
-
+from Obj.UI.ending import Ending
 from tilemap import TileMap
 
 from wall import Wall
@@ -168,7 +168,7 @@ def init():
 
 
 def update():
-    global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death
+    global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death,anim_manager
     import main_menu_mode
     if elderbrother.is_opening == False and bgm_on == False:
         bgm_on = True
@@ -180,7 +180,11 @@ def update():
         death_screen = DeathScreenTitle()
         game_world.add_object(death_screen,7)
         game_framework.camera_manager.set_zoom(3.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
-
+    if elderbrother.is_dead and boss_death == False:
+        boss_death = True
+        ending = Ending(anim_manager)
+        game_world.add_object(ending,7)
+        game_framework.camera_manager.set_zoom(2.0)
 
     # 페이드인 효과
     if fade_alpha > 0:

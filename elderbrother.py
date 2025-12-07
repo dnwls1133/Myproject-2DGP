@@ -391,6 +391,7 @@ class Death:
                 self.elder_brother.current_animation.update()
             else:
                 game_framework.time_manager.set_time_scale(1.0)
+                self.elder_brother.is_dead = True
 
 
 
@@ -448,7 +449,7 @@ class ElderBrother:
         self.hp = 800
         self.x, self.y = 1300, 150
         self.face_dir = -1
-
+        self.is_dead = False
         # 물리 속성
         self.vx = 0
         self.vy = 0
@@ -638,6 +639,7 @@ class ElderBrother:
             print(f"Elder Brother HP: {self.hp}")
             if self.hp <= 0:
                 self.state_machine.handle_state_event(('DEAD', None))
+
 
     def on_collision(self, group, other, collider_type):
         """충돌 지속"""

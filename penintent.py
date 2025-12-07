@@ -905,12 +905,12 @@ class Penintent:
         self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
 
         # 캐릭터 속성
-        self.hp = 100
+        self.hp = 10.0
 
         self.x, self.y = x,y
         self.face_dir = 1
         self.is_dead = False
-        self.damage = 10.0
+        self.damage = 100.0
         # 물리 속성
         self.vx = 0
         self.vy = 0
@@ -1062,7 +1062,7 @@ class Penintent:
             flip=flip
         )
         game_world.add_object(hit_effect,4) # 이펙트를 적절한 레이어에 추가
-고클
+
     def apply_attack_collider_preset(self, ani_name):
         """공격 충돌체 프리셋 적용"""
         preset = self.attack_collider_presets.get(ani_name)
