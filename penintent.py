@@ -491,7 +491,7 @@ class Falling_Over:
             self.penintent.current_animation.set_flip('')
         else:
             self.penintent.current_animation.set_flip('h')
-        self.penintent.ground = -5
+
 
     def exit(self, e):
 
@@ -502,7 +502,8 @@ class Falling_Over:
             if not self.penintent.current_animation.is_animation_end():
                 self.penintent.current_animation.update()
             else:
-                game_framework.change_mode(main_menu_mode)
+                self.penintent.is_dead = True
+
 
 
         dt = game_framework.time_manager.get_fixed_dt()
@@ -770,12 +771,96 @@ class Jump:
             self.penintent.current_animation.draw(self.penintent.x, self.penintent.y)
     pass
 
+class Skill:
+    def __init__(self, penintent):
+        self.penintent = penintent
+        self.keys_held_on_enter = set()
+
+
+    def enter(self, e):
+        self.penintent.set_animation('penitent_skill')
+
+
+        if self.penintent.face_dir == 1:
+            self.penintent.current_animation.set_flip('')
+        else:
+            self.penintent.current_animation.set_flip('h')
+
+        if game_framework.key_manager.is_held(SDLK_a):
+            self.keys_held_on_enter.add('a')
+        if game_framework.key_manager.is_held(SDLK_d):
+            self.keys_held_on_enter.add('d')
+
+
+    def exit(self, e):
+        self.penintent.attack_collider.active = False
+        pass
+
+    def do(self):
+        if self.penintent.current_animation:
+            self.penintent.current_animation.update()
+
+
+            # 공격 판정 프레임 구간 설정 (예: 3~7 프레임)
+            current_frame = self.penintent.current_animation.current_frame
+            if current_frame == 40:
+                # 이펙트 생성
+                effect_x = self.penintent.x + (30 * self.penintent.face_dir)
+                effect_y = self.penintent.y + 10
+                if self.penintent.face_dir == 1:
+                    self.penintent.create_effects('penitent_skill_slash', effect_x, effect_y,0.05,1.5,'')
+                else:
+                    self.penintent.create_effects('penitent_skill_slash', effect_x, effect_y,0.05,1.5,'h')
+
+
+            if 40 <= current_frame <= 46:
+                self.penintent.attack_collider.active = True
+
+
+            else:
+                self.penintent.attack_collider.active = False
+
+
+
+            if self.penintent.current_animation.is_animation_end():
+                # ✅ Attack 종료 시 현재 키 상태 확인
+                key_manager = game_framework.key_manager
+
+                # 이동 키가 눌려있는지 확인
+                a_pressed = key_manager.is_down(SDLK_a)
+                d_pressed = key_manager.is_down(SDLK_d)
+
+                a_held = key_manager.is_held(SDLK_a)
+                d_held = key_manager.is_held(SDLK_d)
+
+                if a_held or d_held:
+                    # 이동 키가 눌려있으면 RUN으로
+                    if a_held:
+                        if d_pressed:
+                            self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+                        else:
+                            self.penintent.state_machine.handle_state_event(('A_HELD', None))
+
+                    else:
+                        if a_pressed:
+                            self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+                        else:
+                            self.penintent.state_machine.handle_state_event(('D_HELD', None))
+                else:
+                    # 모든 이동 키가 떼어져있으면 IDLE로
+                    self.penintent.state_machine.handle_state_event(('ALL_KEYS_UP', None))
+
+    def draw(self):
+        if self.penintent.current_animation:
+            self.penintent.current_animation.draw(self.penintent.x, self.penintent.y)
+    pass
 
 class Penintent:
     def __init__(self, anim_manager,x,y):
         game_framework.camera_manager.set_target(self)
         self.anim_manager = anim_manager
         self.collider = Collider(self, offset_x=0, offset_y=0, width=40, height=90)
+
 
         # 공격 충돌체 (기본적으로 비활성화)
         self.attack_collider = Collider(self, offset_x = 60, offset_y = 0, width = 80, height = 90)
@@ -794,6 +879,7 @@ class Penintent:
             'dodge': {'offset_x': 0, 'offset_y': -30, 'width': 50, 'height': 50},
             'attack': {'offset_x': 0, 'offset_y': 0, 'width': 60, 'height': 90},
             'jump': {'offset_x': 0, 'offset_y': 0, 'width': 40, 'height': 90},
+            'skill': {'offset_x': 0, 'offset_y': 0, 'width': 60, 'height': 90},
             # 필요 시 더 추가
         }
         self.attack_collider_presets = {
@@ -805,7 +891,7 @@ class Penintent:
             'idle', 'attack', 'run', 'start_run', 'stop_run',
             'crouch', 'crouch_up', 'dodge', 'falling_over',
             'getting_up', 'parry_failed', 'parry_success',
-            'jump', 'jump_off', 'jump_front'
+            'jump', 'jump_off', 'jump_front','penitent_skill'
         ]
         # 히트 타이머
         self.hit_flash_timer = 0.0
@@ -816,6 +902,7 @@ class Penintent:
 
         self.x, self.y = x,y
         self.face_dir = 1
+        self.is_dead = False
 
         # 물리 속성
         self.vx = 0
@@ -879,26 +966,29 @@ class Penintent:
         self.PARRY_FAILED = Parry_Failed(self)
         self.PARRY_SUCCESS = Parry_Success(self)
         self.JUMP = Jump(self)
-
+        self.SKILL = Skill(self)
 
         self.state_machine = StateMachine(
             self.IDLE,
             {
                 self.IDLE: {events.a_down: self.START_RUN, events.d_down: self.START_RUN, events.a_up: self.START_RUN, events.d_up: self.START_RUN,
-                            events.s_down: self.CROUCH, events.space_down: self.JUMP, events.k_down: self.ATTACK,
+                            events.s_down: self.CROUCH, events.space_down: self.JUMP, events.k_down: self.ATTACK,events.h_down : self.SKILL,
                              events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER},
                 self.START_RUN: {events.animation_end: self.RUN, events.s_down: self.CROUCH, events.space_down: self.JUMP,
-                                 events.k_down: self.ATTACK,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN,
+                                 events.k_down: self.ATTACK,events.h_down : self.SKILL,events.a_up: self.STOP_RUN, events.d_up:self.STOP_RUN,
                                  events.a_down: self.STOP_RUN, events.d_down:self.STOP_RUN,events.shift_down : self.DODGE,
                                  events.j_down: self.PARRY_FAILED,events.dead : self.FALLING_OVER},
                 self.RUN: {events.space_down: self.JUMP , events.a_up : self.STOP_RUN, events.d_up: self.STOP_RUN,
                            events.s_down: self.CROUCH, events.a_down: self.STOP_RUN, events.d_down: self.STOP_RUN,
-                           events.k_down: self.ATTACK,events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED
+                           events.k_down: self.ATTACK,events.h_down : self.SKILL,events.shift_down : self.DODGE,events.j_down: self.PARRY_FAILED
                           ,events.dead : self.FALLING_OVER},
                 self.STOP_RUN: {events.animation_end: self.IDLE, events.s_down: self.CROUCH,
                                 events.a_down: self.START_RUN, events.d_down: self.START_RUN,
                                 events.a_up: self.START_RUN, events.d_up: self.START_RUN,events.dead : self.FALLING_OVER
                                 },
+                self.SKILL: {events.all_keys_up: self.IDLE,
+                events.a_held: self.START_RUN,
+                events.d_held: self.START_RUN,events.dead : self.FALLING_OVER},
                 self.ATTACK: {events.all_keys_up: self.IDLE,
                 events.a_held: self.START_RUN,
                 events.d_held: self.START_RUN,events.dead : self.FALLING_OVER},

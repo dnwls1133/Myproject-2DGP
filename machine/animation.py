@@ -121,9 +121,24 @@ def register_animations(anim_manager):
         "sprites/Effect/attack_effect/penitent_attack_spark1_anim.png"
     )
     anim_manager.register_animation(
+        'penitent_skill',
+        "sprites/player/texture2d/player_skill/Sprite/penitent_skill_anim.json",
+        "sprites/player/texture2d/player_skill/Sprite/penitent_skill_anim.png"
+    )
+    anim_manager.register_animation(
         'penitent_attack_spark2',
         "sprites/Effect/attack_effect/penitent_attack_spark2_anim.json",
         "sprites/Effect/attack_effect/penitent_attack_spark2_anim.png"
+    )
+    anim_manager.register_animation(
+        'penitent_skill_slash',
+        "sprites/Effect/attack_effect/skill_slash_anim.json",
+        "sprites/Effect/attack_effect/skill_slash_anim.png"
+    )
+    anim_manager.register_animation(
+        'penitent_skill_effect',
+        "sprites/Effect/attack_effect/skill_effect_anim.json",
+        "sprites/Effect/attack_effect/skill_effect_anim.png"
     )
     anim_manager.register_animation(
         'penitent_attack_spark3',

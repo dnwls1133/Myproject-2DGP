@@ -1,20 +1,17 @@
 import game_framework
-from machine.animation import Animation
+
 from pico2d import *
 
 
 
 
-
-class Penient_life_ui:
+class DeathScreenTitle:
     def __init__(self):
 
         self.x,self.y = game_framework.camera_manager.get_window_size()
-        self.x = 150
-        self.y = 1000
-        self.img = load_image('sprites/UI/pe_life_bar.png')
-
-
+        self.x /= 2
+        self.y /= 2 + 50
+        self.img = load_image('sprites/UI/Death/Sprite/death_screen_title.png')
     def update(self):
         pass
 
@@ -23,9 +20,10 @@ class Penient_life_ui:
 
 
 
+
     def draw(self):
-        draw_width = int(self.img.w * 2.0 )
-        draw_height = int(self.img.h * 2.0)
+        draw_width = int(self.img.w * 3.0 )
+        draw_height = int(self.img.h * 3.0)
 
         self.img.clip_draw(0,0,self.img.w,self.img.h,self.x,self.y,draw_width,draw_height)
 

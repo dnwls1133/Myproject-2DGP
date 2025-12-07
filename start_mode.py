@@ -11,6 +11,10 @@ from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
 from floor_object import FloorManager, FloorObject
 from wall import Wall
+from Obj.UI.penient_life_ui import Penient_life_ui
+from Obj.UI.health import Health
+import common
+
 
 from tilemap import TileMap
 
@@ -38,7 +42,7 @@ def init():
     black_screen = load_image('black_screen.png')
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
     game_framework.camera_manager.set_world_size(1700,1000)
-    game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
+    game_framework.camera_manager.set_zoom(3.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
     anim_manager = AnimationManager()
@@ -101,22 +105,22 @@ def init():
 
 
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,1300,150)
+    common.penintent = Penintent(anim_manager,1300,150)
     # 플레이어에게 타일맵 참조 전달
-    penintent.terrain_tilemap = tilemap_terrain
-    penintent.decoration_tilemap = tilemap_deco
-    game_world.add_object(penintent, 3)
-    print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
+    common.penintent.terrain_tilemap = tilemap_terrain
+    common.penintent.decoration_tilemap = tilemap_deco
+    game_world.add_object(common.penintent, 3)
+    print(f"플레이어 생성 완료: 위치 ({common.penintent.x}, {common.penintent.y})")
 
     wall = Wall(1000,300,50,400)
     game_world.add_object(wall,2)
     print(f"벽 생성 완료: 위치 ({wall.x}, {wall.y})")
 
-    machine.collider_manager.add_collision_pair('player:wall', penintent, wall)
+    machine.collider_manager.add_collision_pair('player:wall', common.penintent, wall)
 
     door = Door(1800,200,50,100,on_enter_callback=go_to_boss_stage)
     game_world.add_object(door,2)
-    machine.collider_manager.add_collision_pair('player:door', penintent, door)
+    machine.collider_manager.add_collision_pair('player:door', common.penintent, door)
 
 
 
@@ -125,9 +129,16 @@ def init():
 
 
     for floor in floor_manager.get_all_floors():
-        machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
+        machine.collider_manager.add_collision_pair('player:floor', common.penintent, floor)
 
     print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
+
+    penient_life_ui = Penient_life_ui()
+    game_world.add_object(penient_life_ui, 6)
+    for i in range(common.penintent.hp):
+        health = Health(penient_life_ui.x , penient_life_ui.y,i,common.penintent)
+        game_world.add_object(health, 5)
+
 
     #bgm.repeat_play()
 

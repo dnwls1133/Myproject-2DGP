@@ -10,10 +10,15 @@ from elderbrother import ElderBrother
 from brotherhood_background_0 import BrotherhoodBackground0
 from map_editor_mode import bg_tiles, terrain_tiles, decoration_tiles, fg_tiles
 from floor_object import FloorManager, FloorObject
+from Obj.UI.penient_life_ui import Penient_life_ui
+from Obj.UI.health import Health
+from Obj.UI.death_screen_title import DeathScreenTitle
 
 from tilemap import TileMap
 
 from wall import Wall
+
+import common
 
 # 애니메이션 매니저 초기화
 anim_manager = None
@@ -24,7 +29,8 @@ fade_speed = 300  # 초당 alpha 감소량
 black_screen = None
 elderbrother = None
 bgm_on = False
-
+penintent_death = False
+boss_death = False
 def handle_events():
 
     if game_framework.key_manager.quit:
@@ -42,7 +48,7 @@ def init():
 
     bgm = load_music('music\Dame_Tu_Tormento.mp3')
     game_framework.camera_manager.set_world_size(1800,1000)
-    game_framework.camera_manager.set_zoom(2.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
+    game_framework.camera_manager.set_zoom(3.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     machine.collider_manager.clear_collision_pairs()
 
     anim_manager = AnimationManager()
@@ -104,32 +110,34 @@ def init():
     elderbrother = ElderBrother(anim_manager)
     game_world.add_object(elderbrother, 0)
     print(f"형님 생성 완료: 위치 ({elderbrother.x}, {elderbrother.y})")
-
+    for i in range(elderbrother.hp):
+        health = Health(100, 50,i,elderbrother)
+        game_world.add_object(health, 5)
     # 플레이어 (레이어 2: 타일보다 위에 그려지도록)
-    penintent = Penintent(anim_manager,10,200)
+    common.penintent = Penintent(anim_manager,10,200)
     # 플레이어에게 타일맵 참조 전달
-    penintent.terrain_tilemap = tilemap_terrain
-    penintent.decoration_tilemap = tilemap_deco
+    common.penintent.terrain_tilemap = tilemap_terrain
+    common.penintent.decoration_tilemap = tilemap_deco
     # ✅ 상태 명시적 초기화
-    penintent.x = 10
-    penintent.y = 200
-    penintent.vx = 0
-    penintent.vy = 0
-    penintent.is_grounded = False
-    penintent.state_machine.current_state = penintent.IDLE
-    penintent.set_animation('idle')
-    game_world.add_object(penintent, 3)
-    print(f"플레이어 생성 완료: 위치 ({penintent.x}, {penintent.y})")
+    common.penintent.x = 10
+    common.penintent.y = 200
+    common.penintent.vx = 0
+    common.penintent.vy = 0
+    common.penintent.is_grounded = False
+    common.penintent.state_machine.current_state = common.penintent.IDLE
+    common.penintent.set_animation('idle')
+    game_world.add_object(common.penintent, 3)
+    print(f"플레이어 생성 완료: 위치 ({common.penintent.x}, {common.penintent.y})")
 
 
     wall = Wall(-20,300,10,1000)
     game_world.add_object(wall,2)
-    machine.collider_manager.add_collision_pair('player:wall', penintent, wall)
+    machine.collider_manager.add_collision_pair('player:wall', common.penintent, wall)
 
     # 충돌 페어 등록 : 플레이어 공격 -> 엘더 형님 본체
     machine.collider_manager.add_collision_pair(
         'player_attack:elderBrother',
-        penintent,
+        common.penintent,
         elderbrother
     )
 
@@ -137,16 +145,22 @@ def init():
     machine.collider_manager.add_collision_pair(
         'elderBrother_attack:player',
         elderbrother,
-        penintent
+        common.penintent
     )
 
     print("충돌 페어 등록 완료")
 
     # 충돌 페어 등록 : 플레이어 본체 -> 모든 바닥
     for floor in floor_manager.get_all_floors():
-        machine.collider_manager.add_collision_pair('player:floor', penintent, floor)
+        machine.collider_manager.add_collision_pair('player:floor', common.penintent, floor)
 
     print(f"충돌 페어 등록 완료: player:floor ({len(floor_manager.get_all_floors())}개 바닥)")
+
+    penitent_life_ui = Penient_life_ui()
+    game_world.add_object(penitent_life_ui, 6)
+    for i in range(common.penintent.hp):
+        health = Health(penitent_life_ui.x , penitent_life_ui.y,i,common.penintent)
+        game_world.add_object(health, 5)
 
     #bgm.repeat_play()
 
@@ -154,11 +168,17 @@ def init():
 
 
 def update():
-    global fade_alpha, elderbrother, bgm_on
+    global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death
     if elderbrother.is_opening == False and bgm_on == False:
         bgm_on = True
         bgm.repeat_play()
         bgm.set_volume(64)
+        game_framework.camera_manager.set_zoom(2.0)
+    if common.penintent.is_dead and penintent_death == False:
+        penintent_death = True
+        death_screen = DeathScreenTitle()
+        game_world.add_object(death_screen,7)
+
 
     # 페이드인 효과
     if fade_alpha > 0:

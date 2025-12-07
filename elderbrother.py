@@ -445,7 +445,7 @@ class ElderBrother:
                       'elder_brother_attack',
                       'elder_brother_jump',
                       'elder_brother_death']
-        self.hp = 100
+        self.hp = 800
         self.x, self.y = 1300, 150
         self.face_dir = -1
 
@@ -609,7 +609,7 @@ class ElderBrother:
     def on_collision_enter(self, group, other, collider_type):
         global attack_damaged_sound
         if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
-            self.hp -= 0.5
+            self.hp -= 5.0
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             game_framework.camera_manager.shake(5,0.3)
             effect_x = self.x
