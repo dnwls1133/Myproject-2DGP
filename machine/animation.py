@@ -160,7 +160,11 @@ def register_animations(anim_manager):
         "sprites/Effect/elderbrother_effect/elderBrother_hardlanding_anim.json",
         "sprites/Effect/elderbrother_effect/elderBrother_hardlanding_anim.png"
     )
-
+    anim_manager.register_animation(
+        "game_ending"
+        "sprites/UI/crisanta_bg_main_menu_anim.json",
+        "sprites/UI/crisanta_bg_main_menu_anim.png"
+    )
 
 
 

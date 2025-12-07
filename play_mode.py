@@ -169,6 +169,7 @@ def init():
 
 def update():
     global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death
+    import main_menu_mode
     if elderbrother.is_opening == False and bgm_on == False:
         bgm_on = True
         bgm.repeat_play()
@@ -178,6 +179,7 @@ def update():
         penintent_death = True
         death_screen = DeathScreenTitle()
         game_world.add_object(death_screen,7)
+        game_framework.camera_manager.set_zoom(3.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
 
 
     # 페이드인 효과
@@ -198,6 +200,8 @@ def update():
         game_framework.camera_manager.shake(10,0.5)
     if game_framework.key_manager.is_down(SDLK_ESCAPE):
         game_framework.quit()
+    if game_framework.key_manager.is_down(SDLK_RETURN) and common.penintent.is_dead:
+        game_framework.change_mode(main_menu_mode)
     if fade_alpha == 0:
         game_world.update()
 
@@ -218,11 +222,14 @@ def draw():
     update_canvas()
 
 def finish():
-    global bgm
+    global bgm, bgm_on, penintent_death, boss_death
     game_world.clear()
     machine.collider_manager.clear_collision_pairs()
     if bgm:
         bgm.stop()
+    bgm_on = False
+    penintent_death = False
+    boss_death = False
 
 def pause():
     pass

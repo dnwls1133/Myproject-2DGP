@@ -9,7 +9,7 @@ import game_world
 import math
 import random
 from physics_config import PhysicsConfig
-
+import common
 jump_voice_sound = None
 jump_sound = None
 landing_sound = None
@@ -609,19 +609,30 @@ class ElderBrother:
     def on_collision_enter(self, group, other, collider_type):
         global attack_damaged_sound
         if group == 'player_attack:elderBrother' and collider_type == 'base':  # ← 'attack'이 아니라 'base'
-            self.hp -= 5.0
+            self.hp -= common.penintent.damage
             self.hit_flash_timer = self.hit_flash_duration  # ← 피격 효과 트리거
             game_framework.camera_manager.shake(5,0.3)
             effect_x = self.x
             effect_y = self.y
-            self.create_effects(
-                'penitent_attack_spark1',
-                effect_x,
-                effect_y,
-                delay=0.05,
-                scale=1.5,
-                flip='' if self.face_dir == 1 else 'h'
-            )
+            if common.penintent.damage == 10:
+                self.create_effects(
+                    'penitent_attack_spark1',
+                    effect_x,
+                    effect_y,
+                    delay=0.05,
+                    scale=1.5,
+                    flip='' if self.face_dir == 1 else 'h'
+                )
+            else:
+                self.create_effects(
+                    'penitent_skill_effect',
+                    effect_x,
+                    effect_y,
+                    delay=0.05,
+                    scale=1.5,
+                    flip='' if self.face_dir == 1 else 'h'
+                )
+
             attack_damaged_sound.set_volume(64)
             attack_damaged_sound.play()
             print(f"Elder Brother HP: {self.hp}")

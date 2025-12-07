@@ -1,4 +1,5 @@
 import game_framework
+from pico2d import *
 from machine.animation import Animation
 from machine.state_machine import StateMachine
 from sdl2 import *
@@ -8,7 +9,10 @@ import main_menu_mode
 
 from physics_config import PhysicsConfig
 
-
+attack_hit_sound = None
+def load_sounds():
+    global attack_hit_sound
+    attack_hit_sound = load_wav('music/SFX/PENITENT_ENEMY_HIT_2.wav')
 
 class Idle:
     def __init__(self, penintent):
@@ -491,7 +495,7 @@ class Falling_Over:
             self.penintent.current_animation.set_flip('')
         else:
             self.penintent.current_animation.set_flip('h')
-
+        self.penintent.vx = 0
 
     def exit(self, e):
 
@@ -521,7 +525,7 @@ class Falling_Over:
             self.penintent.vy = 0
             self.penintent.is_grounded = True
         # 위치 업데이트
-        self.penintent.x += self.penintent.vx * dt
+
         self.penintent.y += self.penintent.vy * dt
 
     def draw(self):
@@ -779,8 +783,8 @@ class Skill:
 
     def enter(self, e):
         self.penintent.set_animation('penitent_skill')
-
-
+        self.penintent.current_animation.set_delay(0.03)
+        self.penintent.damage = 100
         if self.penintent.face_dir == 1:
             self.penintent.current_animation.set_flip('')
         else:
@@ -794,6 +798,7 @@ class Skill:
 
     def exit(self, e):
         self.penintent.attack_collider.active = False
+        self.penintent.damage = 10
         pass
 
     def do(self):
@@ -858,6 +863,7 @@ class Skill:
 class Penintent:
     def __init__(self, anim_manager,x,y):
         game_framework.camera_manager.set_target(self)
+        load_sounds()
         self.anim_manager = anim_manager
         self.collider = Collider(self, offset_x=0, offset_y=0, width=40, height=90)
 
@@ -883,7 +889,8 @@ class Penintent:
             # 필요 시 더 추가
         }
         self.attack_collider_presets = {
-            'attack': {'offset_x': 60, 'offset_y': 10, 'width': 80, 'height': 60}
+            'attack': {'offset_x': 60, 'offset_y': 10, 'width': 80, 'height': 60},
+            'penitent_skill': {'offset_x': 50, 'offset_y': 10, 'width': 100, 'height': 100}  # 추가
         }
 
         # 애니메이션 이름 리스트
@@ -903,7 +910,7 @@ class Penintent:
         self.x, self.y = x,y
         self.face_dir = 1
         self.is_dead = False
-
+        self.damage = 10.0
         # 물리 속성
         self.vx = 0
         self.vy = 0
@@ -1055,7 +1062,7 @@ class Penintent:
             flip=flip
         )
         game_world.add_object(hit_effect,4) # 이펙트를 적절한 레이어에 추가
-
+고클
     def apply_attack_collider_preset(self, ani_name):
         """공격 충돌체 프리셋 적용"""
         preset = self.attack_collider_presets.get(ani_name)
@@ -1168,6 +1175,7 @@ class Penintent:
 
     def on_collision_enter(self, group, other,collider_type):
         """Collider Manager로부터 호출되는 충돌 콜백 (현재 사용 안 함)"""
+        global attack_hit_sound
         if group == 'elderBrother_attack:player' and collider_type == 'base':
             self.hp -= 10
             self.vx = -20 * self.face_dir
@@ -1175,6 +1183,8 @@ class Penintent:
 
             effect_x = self.x
             effect_y = self.y
+            attack_hit_sound.set_volume(64)
+            attack_hit_sound.play()
             self.create_effects(
                 'penitent_attack_spark1',
                 effect_x,
