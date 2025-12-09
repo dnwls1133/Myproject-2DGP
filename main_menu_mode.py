@@ -62,7 +62,8 @@ def update():
         game_framework.camera_manager.shake(10,0.5)
     if game_framework.key_manager.is_down(SDLK_SPACE):
         game_framework.change_mode(start_mode)
-
+    if game_framework.key_manager.is_down(SDLK_ESCAPE):
+        game_framework.quit()
     game_world.update()
 
     # 충돌 체크는 game_framework에서 자동으로 실행됨 (중복 제거)
