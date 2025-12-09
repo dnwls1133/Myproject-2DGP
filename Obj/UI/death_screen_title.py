@@ -9,10 +9,11 @@ class DeathScreenTitle:
     def __init__(self):
 
         self.x,self.y = game_framework.camera_manager.get_window_size()
-
+        self.x += 50
 
         self.img = load_image('sprites/UI/Death/Sprite/death_sreen_title.png')
     def update(self):
+
         pass
 
 

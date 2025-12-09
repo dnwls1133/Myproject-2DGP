@@ -369,7 +369,7 @@ class Death:
 
     def enter(self, e):
 
-        game_framework.time_manager.set_time_scale(0.5)  # 시간 느리게 설정
+        #game_framework.time_manager.set_time_scale(0.5)  # 시간 느리게 설정
         self.elder_brother.set_animation('elder_brother_death')
         self.elder_brother.current_animation.set_delay(0.1)
         if self.elder_brother.face_dir == 1:
@@ -390,7 +390,7 @@ class Death:
             if not self.elder_brother.current_animation.is_animation_end():
                 self.elder_brother.current_animation.update()
             else:
-                game_framework.time_manager.set_time_scale(1.0)
+                #game_framework.time_manager.set_time_scale(1.0)
                 self.elder_brother.is_dead = True
 
 
@@ -664,10 +664,4 @@ class ElderBrother:
                 self.current_animation.draw(self.x, self.y)
 
 
-        self.collider.draw_debug()
 
-        if self.attack_collider.active:
-            self.attack_collider.draw_debug()
-
-        if self.jump_attack_collider.active:
-            self.jump_attack_collider.draw_debug()

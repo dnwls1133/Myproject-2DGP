@@ -148,6 +148,12 @@ def init():
         common.penintent
     )
 
+    wall = Wall(1750, 300, 50, 400)
+    game_world.add_object(wall, 2)
+    print(f"벽 생성 완료: 위치 ({wall.x}, {wall.y})")
+
+    machine.collider_manager.add_collision_pair('player:wall', common.penintent, wall)
+
     print("충돌 페어 등록 완료")
 
     # 충돌 페어 등록 : 플레이어 본체 -> 모든 바닥
@@ -168,7 +174,7 @@ def init():
 
 
 def update():
-    global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death,anim_manager
+    global fade_alpha, elderbrother, bgm_on, penintent_death, boss_death,anim_manager,bgm
     import main_menu_mode
     if elderbrother.is_opening == False and bgm_on == False:
         bgm_on = True
@@ -182,9 +188,12 @@ def update():
         game_framework.camera_manager.set_zoom(3.0)  # 3.0에서 2.0으로 조정 (너무 확대되면 문제 발생)
     if elderbrother.is_dead and boss_death == False:
         boss_death = True
+        bgm = load_music('music\Ten_Ten.mp3')
+        bgm.repeat_play()
+        bgm.set_volume(64)
         ending = Ending(anim_manager)
         game_world.add_object(ending,7)
-        game_framework.camera_manager.set_zoom(2.0)
+        game_framework.camera_manager.set_zoom(1.0)
 
     # 페이드인 효과
     if fade_alpha > 0:

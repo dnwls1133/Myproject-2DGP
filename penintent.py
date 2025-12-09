@@ -890,7 +890,7 @@ class Penintent:
         }
         self.attack_collider_presets = {
             'attack': {'offset_x': 60, 'offset_y': 10, 'width': 80, 'height': 60},
-            'penitent_skill': {'offset_x': 50, 'offset_y': 10, 'width': 100, 'height': 100}  # 추가
+            'penitent_skill': {'offset_x': 0, 'offset_y': 10, 'width': 100, 'height': 100}  # 추가
         }
 
         # 애니메이션 이름 리스트
@@ -905,12 +905,12 @@ class Penintent:
         self.hit_flash_duration = 0.2  # 피격 플래시 지속 시간
 
         # 캐릭터 속성
-        self.hp = 10.0
+        self.hp = 100
 
         self.x, self.y = x,y
         self.face_dir = 1
         self.is_dead = False
-        self.damage = 100.0
+        self.damage = 10.0
         # 물리 속성
         self.vx = 0
         self.vy = 0
@@ -1147,7 +1147,7 @@ class Penintent:
 
             self.apply_collider_preset(name)
 
-            if name == 'attack':
+            if name == 'attack' or name == 'penitent_skill':
                 self.apply_attack_collider_preset(name)
             else:
                 self.attack_collider.active = False
@@ -1236,6 +1236,4 @@ class Penintent:
                 self.current_animation.reset_color_mode()
                 self.current_animation.draw(self.x, self.y)
 
-        self.collider.draw_debug()
-        if self.attack_collider.active:
-            self.attack_collider.draw_debug()
+

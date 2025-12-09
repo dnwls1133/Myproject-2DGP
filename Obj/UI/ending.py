@@ -1,7 +1,7 @@
 import game_framework
 from machine.animation import Animation
 import game_world
-
+import main_menu_mode
 
 
 
@@ -13,8 +13,8 @@ class Ending:
         self.x,self.y = game_framework.camera_manager.get_window_size()
         #self.x /= 2
         #self.y /= 2
-        self.y -= 200
-        self.x += 80
+
+
         anim_names = [
             'game_ending']
         # 딕셔너리로 애니메이션 관리
@@ -53,7 +53,7 @@ class Ending:
         if self.current_animation:
             self.current_animation.update()
             if self.current_animation.is_animation_end():
-                game_world.remove_object(self)
+                game_framework.change_mode(main_menu_mode)
 
 
 
@@ -63,4 +63,4 @@ class Ending:
 
     def draw(self):
         if self.current_animation:
-            self.current_animation.draw(self.x, self.y,scale = 2.0)
+            self.current_animation.draw(self.x, self.y,scale = 3.0)
